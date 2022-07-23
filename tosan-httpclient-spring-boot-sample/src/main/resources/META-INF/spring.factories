@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.tosan.client.http.sample.server.api.config.feign.CustomServerFeignConfig

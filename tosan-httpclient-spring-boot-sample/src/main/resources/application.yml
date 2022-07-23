@@ -1,0 +1,18 @@
+custom-server:
+  client:
+    authorization:
+      enable: true
+      username: user
+      password: changeit
+    base-service-url: http://localhost:8084
+    connection:
+      connection-timeout: 5000
+      socket-timeout: 5000
+
+server:
+  port: 8084
+
+# sample for feignLogger
+logging:
+  level:
+    com.tosan.client.sample.server.api.controller: DEBUG
