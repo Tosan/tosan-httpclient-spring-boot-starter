@@ -13,8 +13,6 @@
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.install.skip>true</maven.install.skip>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
-        <maven.source.skip>true</maven.source.skip>
     </properties>
 
     <dependencies>
@@ -46,13 +44,6 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
