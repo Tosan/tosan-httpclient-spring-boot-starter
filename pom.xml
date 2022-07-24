@@ -41,7 +41,7 @@
         <connection>scm:git:https://github.com/Tosan/tosan-httpclient-spring-boot-starter.git</connection>
         <developerConnection>scm:git:https://github.com/Tosan/tosan-httpclient-spring-boot-starter.git
         </developerConnection>
-        <url>https://github.com/Tosan/tosan-httpclient-spring-boot-starter/master</url>
+        <url>https://github.com/Tosan/tosan-httpclient-spring-boot-starter</url>
         <tag>HEAD</tag>
     </scm>
 
