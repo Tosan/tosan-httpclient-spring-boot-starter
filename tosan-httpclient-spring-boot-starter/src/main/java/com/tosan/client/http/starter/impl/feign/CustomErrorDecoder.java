@@ -44,10 +44,10 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
             StreamUtils.copy(body.asInputStream(), output);
             String responseBody = new String(output.toByteArray());
             int status = response.status();
+            LOGGER.info("ServerErrorResponse :\n ResponseStatus:{}\n ResponseBody:{}", status,
+                    responseBody);
             Map<String, Class<? extends Exception>> exceptionMap = customErrorDecoderConfig.getExceptionMap();
             if (status >= 400 && status < 500) {
-                LOGGER.debug("serverResponseException :\n responseStatus:{}\n responseBody:{}", status,
-                        responseBody);
                 ErrorObject errorObject = jsonToObject(responseBody, ErrorObject.class);
                 String errorType = errorObject.getErrorType();
                 String errorCode = errorObject.getErrorCode();
@@ -61,8 +61,6 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
                     return unknownException;
                 }
             }
-            LOGGER.debug("ServerInternalRuntimeException :\n responseStatus:{}\n responseBody:{}", response.status(),
-                    responseBody);
             InternalServerException internalServerException = jsonToObject(responseBody, InternalServerException.class);
             if (internalServerException.getErrorParam() == null) {
                 Map<String, Object> errorMap = new HashMap<>();
