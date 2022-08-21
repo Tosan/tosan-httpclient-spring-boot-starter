@@ -1,4 +1,4 @@
-# tosan-httpclient-feign-spring-boot-starter
+# tosan-httpclient-spring-boot-starter
 
 This project provides a Spring-Boot Starter that enables the additional configuration of the used Httpclients and
 FeignClient.
@@ -74,7 +74,7 @@ Also, You can use [ErrorObject](./tosan-httpclient-spring-boot-starter/src/main/
 <a name="custom_error_decoder_config">
 </a>
 
-###Custom error decoder config definition
+### Custom error decoder config definition
 Now it is the turn of the only remaining abstract method in the configuration class.
 This project provides configuration bean called customErrorDecoderConfig [CustomErrorDecoderConfig](./tosan-httpclient-spring-boot-starter/src/main/java/com/tosan/client/http/starter/impl/feign/CustomErrorDecoderConfig.java) to identify your errors.
 
@@ -220,6 +220,9 @@ All configuration values are prefixed by your defined prefix. (e.g. prefix=custo
 | ssl.truststore.path | Truststore file path | | `classpath:truststore.jks` |
 | ssl.truststore.password | Truststore password | | `changeit` |
 | ssl.truststore.type | Truststore type (optional) | `JKS` | `PKCS12` |
+| authorization.enable | Authorization enable (optional) | false | `true` or `false` |
+| authorization.username | Authorization user name (optional) | | `testUser`|
+| authorization.password | Authorization password (optional) | | `testPassword` |
 
 Example:
 
