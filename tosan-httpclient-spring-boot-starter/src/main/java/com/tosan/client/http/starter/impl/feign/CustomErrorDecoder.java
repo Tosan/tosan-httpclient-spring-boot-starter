@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.tosan.client.http.starter.impl.feign.exception.*;
-import com.tosan.client.http.starter.impl.feign.exception.*;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import org.reflections.Reflections;
@@ -17,6 +16,7 @@ import org.springframework.util.StreamUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
             Response.Body body = response.body();
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             StreamUtils.copy(body.asInputStream(), output);
-            String responseBody = new String(output.toByteArray());
+            String responseBody = output.toString();
             int status = response.status();
             LOGGER.info("ServerErrorResponse :\n ResponseStatus:{}\n ResponseBody:{}", status,
                     responseBody);
@@ -124,8 +124,10 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
                                 "extractType is EXCEPTION_IDENTIFIER_FIELDS or FULL_NAME_REFLECTION");
             }
             Reflections reflections = new Reflections(scanPackageList.toArray());
-            reflections.getSubTypesOf(checkedExceptionClass).forEach(this::extractAndFillMap);
-            reflections.getSubTypesOf(uncheckedExceptionClass).forEach(this::extractAndFillMap);
+            reflections.getSubTypesOf(checkedExceptionClass)
+                    .stream().filter(clazz -> !Modifier.isAbstract(clazz.getModifiers())).forEach(this::extractAndFillMap);
+            reflections.getSubTypesOf(uncheckedExceptionClass)
+                    .stream().filter(clazz -> !Modifier.isAbstract(clazz.getModifiers())).forEach(this::extractAndFillMap);
         }
     }
 
@@ -147,7 +149,7 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
                 String exceptionKey = exception.getErrorType() + "." + exception.getErrorCode();
                 exceptionMap.put(exceptionKey, type);
             } catch (IllegalAccessException | NoSuchMethodException | InstantiationException |
-                    InvocationTargetException e) {
+                     InvocationTargetException e) {
                 LOGGER.warn("error on construction of {}.", type.getSimpleName());
                 LOGGER.warn("Exception:", e);
             }
