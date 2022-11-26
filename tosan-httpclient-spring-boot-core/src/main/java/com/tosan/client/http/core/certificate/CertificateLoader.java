@@ -1,6 +1,6 @@
-package com.tosan.client.http.starter.impl.certificates;
+package com.tosan.client.http.core.certificate;
 
-import com.tosan.client.http.starter.HttpClientProperties;
+import com.tosan.client.http.core.HttpClientProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;

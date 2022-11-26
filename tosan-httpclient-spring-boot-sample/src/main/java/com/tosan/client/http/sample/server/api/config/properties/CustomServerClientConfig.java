@@ -1,6 +1,6 @@
 package com.tosan.client.http.sample.server.api.config.properties;
 
-import com.tosan.client.http.starter.HttpClientProperties;
+import com.tosan.client.http.core.HttpClientProperties;
 
 /**
  * @author Ali Alimohammadi

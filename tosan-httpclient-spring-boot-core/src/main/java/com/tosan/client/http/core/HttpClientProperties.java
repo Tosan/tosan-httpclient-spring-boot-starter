@@ -1,4 +1,4 @@
-package com.tosan.client.http.starter;
+package com.tosan.client.http.core;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;

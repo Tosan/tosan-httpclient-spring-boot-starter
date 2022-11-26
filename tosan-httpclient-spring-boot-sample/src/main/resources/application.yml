@@ -1,10 +1,20 @@
-custom-server:
-  client:
+custom-service:
     authorization:
       enable: true
       username: user
       password: changeit
     base-service-url: http://localhost:8084
+    connection:
+      connection-timeout: 5000
+      socket-timeout: 5000
+
+custom-web-service:
+  client:
+    authorization:
+      enable: true
+      username: user
+      password: changeit
+    base-service-url: http://localhost:8084/custom-server
     connection:
       connection-timeout: 5000
       socket-timeout: 5000

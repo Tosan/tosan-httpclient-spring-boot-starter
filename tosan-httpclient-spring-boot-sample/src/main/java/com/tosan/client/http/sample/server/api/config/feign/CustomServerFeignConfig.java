@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tosan.client.http.sample.server.api.config.properties.CustomServerClientConfig;
 import com.tosan.client.http.sample.server.api.controller.CustomServerRestController;
 import com.tosan.client.http.sample.server.api.exception.CustomServerException;
-import com.tosan.client.http.starter.HttpClientProperties;
+import com.tosan.client.http.core.HttpClientProperties;
 import com.tosan.client.http.starter.configuration.AbstractFeignConfiguration;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
@@ -46,10 +46,9 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
         return super.objectMapper();
     }
 
-
-    @Bean
+    @Bean("customServer-clientConfig")
     @ConfigurationProperties(prefix = "custom-service")
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = "customServer-clientConfig")
     public HttpClientProperties customServerClientConfig() {
         return new CustomServerClientConfig();
     }
@@ -58,8 +57,8 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
     @Bean("customServer-apacheHttpClientFactory")
     public ApacheHttpClientFactory apacheHttpClientFactory(
             @Qualifier("customServer-httpClientBuilder") HttpClientBuilder builder,
-            @Qualifier("customerServer-connectionManagerFactory") ApacheHttpClientConnectionManagerFactory clientConnectionManagerFactory,
-            HttpClientProperties customServerClientConfig) {
+            @Qualifier("customServer-connectionManagerFactory") ApacheHttpClientConnectionManagerFactory clientConnectionManagerFactory,
+            @Qualifier("customServer-clientConfig") HttpClientProperties customServerClientConfig) {
         return super.apacheHttpClientFactory(builder, clientConnectionManagerFactory, customServerClientConfig);
     }
 
@@ -78,7 +77,7 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
     }
 
     @Override
-    @Bean("customerServer-connectionManagerFactory")
+    @Bean("customServer-connectionManagerFactory")
     public ApacheHttpClientConnectionManagerFactory connectionManagerFactory() {
         return super.connectionManagerFactory();
     }
@@ -98,7 +97,7 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
     @Override
     @Bean("customServer-requestInterceptors")
     public List<RequestInterceptor> requestInterceptors(
-            HttpClientProperties customServerClientConfig,
+            @Qualifier("customServer-clientConfig") HttpClientProperties customServerClientConfig,
             @Qualifier("customServer-requestInterceptor") RequestInterceptor requestInterceptor) {
         return super.requestInterceptors(customServerClientConfig, requestInterceptor);
     }
@@ -132,7 +131,7 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
     @Bean("customServer-feignErrorDecoderConfig")
     public CustomErrorDecoderConfig customErrorDecoderConfig(@Qualifier("customServer-objectMapper") ObjectMapper objectMapper) {
         CustomErrorDecoderConfig customErrorDecoderConfig = new CustomErrorDecoderConfig();
-        customErrorDecoderConfig.getScanPackageList().add("com.tosan.client.sample.server.api.exception");
+        customErrorDecoderConfig.getScanPackageList().add("com.tosan.client.http.sample.server.api.exception");
         customErrorDecoderConfig.setExceptionExtractType(ExceptionExtractType.EXCEPTION_IDENTIFIER_FIELDS);
         customErrorDecoderConfig.setCheckedExceptionClass(CustomServerException.class);
         customErrorDecoderConfig.setUncheckedExceptionClass(TosanWebServiceRuntimeException.class);
@@ -172,7 +171,8 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
 
     @Override
     @Bean("customServer-feignOption")
-    public Request.Options options(HttpClientProperties customServerClientConfig) {
+    public Request.Options options(
+            @Qualifier("customServer-clientConfig") HttpClientProperties customServerClientConfig) {
         return super.options(customServerClientConfig);
     }
 
@@ -194,8 +194,8 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
 
     @Bean
     public CustomServerRestController clientServerRestController(
-            HttpClientProperties customServerClientConfig,
-            Feign.Builder feignBuilder) {
+            @Qualifier("customServer-clientConfig") HttpClientProperties customServerClientConfig,
+            @Qualifier("customServer-feignBuilder") Feign.Builder feignBuilder) {
         return feignBuilder
                 .logger(new Slf4jLogger(CustomServerRestController.class))
                 .target(CustomServerRestController.class, customServerClientConfig.getBaseServiceUrl()

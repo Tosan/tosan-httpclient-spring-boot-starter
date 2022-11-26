@@ -1,7 +1,7 @@
-package com.tosan.client.http.starter.impl;
+package com.tosan.client.http.core.factory;
 
-import com.tosan.client.http.starter.impl.certificates.CertificateLoader;
-import com.tosan.client.http.starter.HttpClientProperties;
+import com.tosan.client.http.core.certificate.CertificateLoader;
+import com.tosan.client.http.core.HttpClientProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;

@@ -1,6 +1,6 @@
-package com.tosan.client.http.starter;
+package com.tosan.client.http.core.factory;
 
-import com.tosan.client.http.starter.impl.ConfigurableApacheHttpClientFactory;
+import com.tosan.client.http.core.HttpClientProperties;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.config.RequestConfig;
@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ConfigurableApacheHttpClientFactoryTest {
+public class ConfigurableApacheHttpClientFactoryUTest {
 
     private final HttpClientProperties.ConnectionConfiguration connectionConfiguration = new HttpClientProperties.ConnectionConfiguration();
     private final HttpClientProperties.SSLConfiguration sslConfiguration = new HttpClientProperties.SSLConfiguration();

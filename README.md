@@ -31,7 +31,7 @@ for this purpose, the actions mentioned in the following steps should be done.
 All methods of this configuration class must be annotated with @Bean(\"[yourWebServiceName]-methodName\") and all input arg of these methods must be annotated with @Qualifier(\"[yourDefineBeanName]\")\
 See [CustomServerFeignConfig](./tosan-httpclient-spring-boot-sample/src/main/java/com/tosan/client/http/sample/server/api/config/feign/CustomServerFeignConfig.java)\
 The super method should be called in  all methods of this class except one abstract method([customErrorDecoderConfig](#custom_error_decoder_config)).
-> 2. Define a bean for client config class inherit [HttpClientProperties](./tosan-httpclient-spring-boot-starter/src/main/java/com/tosan/client/http/starter/HttpClientProperties.java) class with a custom prefix for setting of project in this configuration class.
+> 2. Define a bean for client config class inherit [HttpClientProperties](./tosan-httpclient-spring-boot-core/src/main/java/com/tosan/client/http/core/HttpClientProperties.java) class with a custom prefix for setting of project in this configuration class.
 see [Configuration](#configuration) section.
 > 3. The errors returned by a service provider must follow the [Exception specific standard](#exception_specific_standard).
 > 4. Define interfaces to provide api to your clients. In these interfaces, you should put the signature of your methods. 

@@ -32,7 +32,9 @@
 
 
     <modules>
+        <module>tosan-httpclient-spring-boot-core</module>
         <module>tosan-httpclient-spring-boot-starter</module>
+        <module>tosan-httpclient-spring-boot-resttemplate-starter</module>
         <module>tosan-httpclient-spring-boot-sample</module>
     </modules>
 
@@ -75,9 +77,19 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.tosan.client.http</groupId>
+                <artifactId>tosan-httpclient-spring-boot-resttemplate-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
                 <version>0.10.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.tosan.tools</groupId>
+                <artifactId>tosan-mask-spring-boot-starter</artifactId>
+                <version>1.0.5</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
