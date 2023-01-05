@@ -1,17 +1,28 @@
 # tosan-httpclient-spring-boot-starter
 
-This project provides a Spring-Boot Starter that enables the additional configuration of the used Httpclients and
-FeignClient.
+This project provides two Spring-Boot Starter that enables the additional configuration of the used Httpclients and
+FeignClient for produce sdk or rest template client.
 
 ## Usage
-
-The `tosan-httpclient-spring-boot-starter` brings most of the required configuration with it, therefore you only need to
-add it as a maven dependency and enable the desired Httpclient.
+To use these starters, it is enough to add the following dependencies to the project based on your needs so that
+the configuration are brought to the project, therefore you only need to add it as a maven dependency.
+The `tosan-httpclient-spring-boot-starter` brings the required configuration for produce sdk in http server and the
+`tosan-httpclient-spring-boot-resttemplate-starter` brings the required configuration for rest template client in every
+consumer of any rest web service.
+The usage of both are completely separate from each other.
 
 ```
         <dependency>
             <groupId>com.tosan.client.http</groupId>
             <artifactId>tosan-httpclient-spring-boot-starter</artifactId>
+            <version>latest-version</version>
+        </dependency>
+```
+
+```
+        <dependency>
+            <groupId>com.tosan.client.http</groupId>
+            <artifactId>tosan-httpclient-spring-boot-resttemplate-starter</artifactId>
             <version>latest-version</version>
         </dependency>
 ```
@@ -28,17 +39,17 @@ The main benefit of this starter is to help you for build SDK for Rest web servi
 for this purpose, the actions mentioned in the following steps should be done.
 
 > 1. Create Configuration class that inherit [AbstractFeignConfiguration](./tosan-httpclient-spring-boot-starter/src/main/java/com/tosan/client/http/starter/configuration/AbstractFeignConfiguration.java) class and override all methods.\
-All methods of this configuration class must be annotated with @Bean(\"[yourWebServiceName]-methodName\") and all input arg of these methods must be annotated with @Qualifier(\"[yourDefineBeanName]\")\
-See [CustomServerFeignConfig](./tosan-httpclient-spring-boot-sample/src/main/java/com/tosan/client/http/sample/server/api/config/feign/CustomServerFeignConfig.java)\
-The super method should be called in  all methods of this class except one abstract method([customErrorDecoderConfig](#custom_error_decoder_config)).
+     All methods of this configuration class must be annotated with @Bean(\"[yourWebServiceName]-methodName\") and all input arg of these methods must be annotated with @Qualifier(\"[yourDefineBeanName]\")\
+     See [CustomServerFeignConfig](./tosan-httpclient-spring-boot-sample/src/main/java/com/tosan/client/http/sample/server/api/config/feign/CustomServerFeignConfig.java)\
+     The super method should be called in  all methods of this class except one abstract method([customErrorDecoderConfig](#custom_error_decoder_config)).
 > 2. Define a bean for client config class inherit [HttpClientProperties](./tosan-httpclient-spring-boot-core/src/main/java/com/tosan/client/http/core/HttpClientProperties.java) class with a custom prefix for setting of project in this configuration class.
-see [Configuration](#configuration) section.
+     see [Configuration](#configuration) section.
 > 3. The errors returned by a service provider must follow the [Exception specific standard](#exception_specific_standard).
-> 4. Define interfaces to provide api to your clients. In these interfaces, you should put the signature of your methods. 
-All the annotations related to RequestMapping should be defined in these interfaces, and the controllers should inherit from them. 
-All these interfaces must be annotated with @SdkController and @FeignClient.\
-If you have @RequestMapping on the these interface, define a string variable called PATH with value of RequestMapping annotation, then remove @RequestMapping in interface and add @RequestMapping(YourInterface.PATH) to concrete controller class.\
-See [CustomServerRestController](./tosan-httpclient-spring-boot-sample/src/main/java/com/tosan/client/http/sample/server/api/controller/CustomServerRestController.java)
+> 4. Define interfaces to provide api to your clients. In these interfaces, you should put the signature of your methods.
+     All the annotations related to RequestMapping should be defined in these interfaces, and the controllers should inherit from them.
+     All these interfaces must be annotated with @SdkController and @FeignClient.\
+     If you have @RequestMapping on the these interface, define a string variable called PATH with value of RequestMapping annotation, then remove @RequestMapping in interface and add @RequestMapping(YourInterface.PATH) to concrete controller class.\
+     See [CustomServerRestController](./tosan-httpclient-spring-boot-sample/src/main/java/com/tosan/client/http/sample/server/api/controller/CustomServerRestController.java)
 
 
 
@@ -135,7 +146,7 @@ in this strategy you must make exceptionMap manually.
 At first You must define exceptions that inherit TosanWebServiceException and TosanWebServiceRuntimeException classes.
 these classes have two methods(getErrorType() and getErrorCode()).
 then add exception packages to scan automatically and detect sub type of TosanWebServiceException and TosanWebServiceRuntimeException classes.
-it will make conversion map automatically by these methods and simple name of exception classes. 
+it will make conversion map automatically by these methods and simple name of exception classes.
 
         `key = getErrorType() + '.' + getErrorCode()`
 
@@ -184,11 +195,27 @@ another parameter besides standard parameters called jsonResponse that is respon
 This conversion just do for http status that are equals or greater than 400 and less than 500. It
 returns `InternalServerErrorException` for other http status error code.
 
+
+### Rest template starter
+The main benefit of this starter is to help you for consume any Rest web services.
+for this purpose, the actions mentioned in the following steps should be done.
+
+> 1. Create Configuration class that inherit [AbstractHttpClientConfiguration](./tosan-httpclient-spring-boot-resttemplate-starter/src/main/java/com/tosan/client/http/resttemplate/starter/configuration/AbstractHttpClientConfiguration.java) class and override all methods.\
+     All methods of this configuration class must be annotated with @Bean(\"[yourWebServiceName]-methodName\") and all input arg of these methods must be annotated with @Qualifier(\"[yourDefineBeanName]\")\
+     See [ExternalServiceConfiguration](./tosan-httpclient-spring-boot-sample/src/main/java/com/tosan/client/http/sample/restclient/config/ExternalServiceConfiguration.java)\
+     The super method should be called in  all methods of this class except three abstract method([responseErrorHandler](#response_error_handler),getExternalServiceName,[clientConfig](#configuration)).
+> 2. Implement getExternalWebService by returning web service name.
+> 3. Define a bean for client config class inherit [HttpClientProperties](./tosan-httpclient-spring-boot-core/src/main/java/com/tosan/client/http/core/HttpClientProperties.java) class with a custom prefix for setting of project in this configuration class.
+     see [Configuration](#configuration) section.
+> 4. For handle error of service must follow the [Error Handler Interceptor](#error_handler_interceptor).
+> 5. At last inject ExternalServiceInvoker bean in app and get rest template and call any service.
+
+
 ## Configuration
 
 <a name="configuration">
 </a>
-
+Both starters use the same class to configure settings.
 You can define client config class custom prefix for setting that inherit HttpClientProperties class.
 All configuration values are prefixed by your defined prefix. (e.g. prefix=custom-service.client  `custom-service.client.connection.connectionTimeout`).
 
