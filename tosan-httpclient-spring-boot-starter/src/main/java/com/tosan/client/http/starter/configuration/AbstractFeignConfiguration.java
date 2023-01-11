@@ -8,12 +8,14 @@ import com.tosan.client.http.core.HttpClientProperties;
 import com.tosan.client.http.core.factory.ConfigurableApacheHttpClientFactory;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
+import com.tosan.client.http.starter.impl.feign.exception.FeignConfigurationException;
 import feign.*;
 import feign.auth.BasicAuthRequestInterceptor;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
 import feign.httpclient.ApacheHttpClient;
+import feign.slf4j.Slf4jLogger;
 import org.apache.http.client.HttpClient;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -162,5 +164,36 @@ public abstract class AbstractFeignConfiguration {
                 .requestInterceptors(requestInterceptors)
                 .retryer(retryer)
                 .logLevel(logLevel);
+    }
+
+    protected final <T> T getFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
+                                    Class<T> classType) {
+        return createFeignController(baseServiceUrl, controllerPath, feignBuilder, classType, new Slf4jLogger(classType));
+    }
+
+    protected final <T> T getFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
+                                    Class<T> classType, Logger logger) {
+        return createFeignController(baseServiceUrl, controllerPath, feignBuilder, classType, logger);
+    }
+
+    protected final <T> T getFeignController(String baseServiceUrl, Feign.Builder feignBuilder,
+                                    Class<T> classType) {
+        return createFeignController(baseServiceUrl, null, feignBuilder, classType, new Slf4jLogger(classType));
+    }
+
+    protected final <T> T getFeignController(String baseServiceUrl, Feign.Builder feignBuilder,
+                                    Class<T> classType, Logger logger) {
+        return createFeignController(baseServiceUrl, null, feignBuilder, classType, logger);
+    }
+
+    private <T> T createFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
+                                          Class<T> classType, Logger logger) {
+        if (baseServiceUrl == null) {
+            throw new FeignConfigurationException("base service url for feign client can not be null.");
+        }
+
+        return feignBuilder
+                .logger(logger)
+                .target(classType, controllerPath != null ? baseServiceUrl + controllerPath : baseServiceUrl);
     }
 }

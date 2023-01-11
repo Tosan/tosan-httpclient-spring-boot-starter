@@ -3,7 +3,6 @@ package com.tosan.client.http.core;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotNull;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -13,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 @Validated
 public class HttpClientProperties {
 
-    @NotNull
     private String baseServiceUrl;
     @NestedConfigurationProperty
     private SSLConfiguration ssl = new SSLConfiguration();
@@ -125,6 +123,7 @@ public class HttpClientProperties {
     }
 
     public static class SSLConfiguration {
+        private boolean enable;
         /**
          * Sets the SSLContext protocol algorithm name.
          */
@@ -134,6 +133,14 @@ public class HttpClientProperties {
         private KeystoreConfiguration keystore = new KeystoreConfiguration();
         @NestedConfigurationProperty
         private TruststoreConfiguration truststore = new TruststoreConfiguration();
+
+        public boolean isEnable() {
+            return enable;
+        }
+
+        public void setEnable(boolean enable) {
+            this.enable = enable;
+        }
 
         public String getContext() {
             return context;

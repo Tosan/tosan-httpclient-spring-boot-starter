@@ -49,6 +49,7 @@ for this purpose, the actions mentioned in the following steps should be done.
      All the annotations related to RequestMapping should be defined in these interfaces, and the controllers should inherit from them.
      All these interfaces must be annotated with @SdkController and @FeignClient.\
      If you have @RequestMapping on the these interface, define a string variable called PATH with value of RequestMapping annotation, then remove @RequestMapping in interface and add @RequestMapping(YourInterface.PATH) to concrete controller class.\
+     Also you must create bean from any controller in configuration class by getFeignController method in [AbstractFeignConfiguration](./tosan-httpclient-spring-boot-starter/src/main/java/com/tosan/client/http/starter/configuration/AbstractFeignConfiguration.java) class.\
      See [CustomServerRestController](./tosan-httpclient-spring-boot-sample/src/main/java/com/tosan/client/http/sample/server/api/controller/CustomServerRestController.java)
 
 
@@ -220,36 +221,37 @@ You can define client config class custom prefix for setting that inherit HttpCl
 All configuration values are prefixed by your defined prefix. (e.g. prefix=custom-service.client  `custom-service.client.connection.connectionTimeout`).
 
 
-| Config | Description | Default | Example | 
-|---|---|---|---|
-| baseServiceUrl | Base service url (required) | | `localhost:8080/example` |
-| sslContext | SSL Version (optional) | `TLSv1.2` | `TLSv1.1` |
-| connection.connectionTimeout (optional) | Connection Timeout in ms | 5000 | `2000` |
-| connection.socketTimeout (optional) |  Socket Timeout in ms | 10000 | `5000` |
-| connection.maxConnections (optional) |  max number of connections | 200 | `100` |
-| connection.maxConnectionsPerRoute (optional) |  max number of connections per route | 50 | `10` |
-| connection.timeToLive (optional) |  time to live | 900 | `300` |
-| connection.timeToLiveUnit (optional) |  time to live unit | SECONDS | `MINUTES` |
-| connection.followRedirects (optional) |  following redirects | true | `true` or `false` |
-| connection.connectionTimerRepeat (optional) |  connection timer repeat | 3000 | `1000` |
-| proxy (optional) | Configuration for used proxy servers | | |
-| proxy.enable | Proxy enable (optional) | false | `true` or `false` |
-| proxy.host | Hostname or IP of the Proxy | | `192.168.7.130` or `corp-proxy.domain` |
-| proxy.port | Port of the Proxy (optional) | | `100` |
-| proxy.user | Proxy user name (optional) | | `testUser`|
-| proxy.password | Proxy password (optional) | | `testPassword` |
-| ssl (optional) | Configuration for ssl | | |
-| ssl.context | SSL Version (optional) | `TLSv1.2` | `TLSv1.1` |
-| ssl.check-validity | Check SSL validity (optional) | false | `true` or `false` |
-| ssl.keystore.path | Keystore file path | | `classpath:keystore.jks` |
-| ssl.keystore.password | Keystore password | | `changeit` |
-| ssl.keystore.type | Keystore type (optional) | `JKS` | `PKCS12` |
-| ssl.truststore.path | Truststore file path | | `classpath:truststore.jks` |
-| ssl.truststore.password | Truststore password | | `changeit` |
-| ssl.truststore.type | Truststore type (optional) | `JKS` | `PKCS12` |
-| authorization.enable | Authorization enable (optional) | false | `true` or `false` |
-| authorization.username | Authorization user name (optional) | | `testUser`|
-| authorization.password | Authorization password (optional) | | `testPassword` |
+| Config                                       | Description                          | Default | Example | 
+|----------------------------------------------|--------------------------------------|---|---|
+| baseServiceUrl                               | Base service url (required)          | | `localhost:8080/example` |
+| sslContext                                   | SSL Version (optional)               | `TLSv1.2` | `TLSv1.1` |
+| connection.connectionTimeout (optional)      | Connection Timeout in ms             | 5000 | `2000` |
+| connection.socketTimeout (optional)          | Socket Timeout in ms                 | 10000 | `5000` |
+| connection.maxConnections (optional)         | max number of connections            | 200 | `100` |
+| connection.maxConnectionsPerRoute (optional) | max number of connections per route  | 50 | `10` |
+| connection.timeToLive (optional)             | time to live                         | 900 | `300` |
+| connection.timeToLiveUnit (optional)         | time to live unit                    | SECONDS | `MINUTES` |
+| connection.followRedirects (optional)        | following redirects                  | true | `true` or `false` |
+| connection.connectionTimerRepeat (optional)  | connection timer repeat              | 3000 | `1000` |
+| proxy (optional)                             | Configuration for used proxy servers | | |
+| proxy.enable                                 | Proxy enable (optional)              | false | `true` or `false` |
+| proxy.host                                   | Hostname or IP of the Proxy          | | `192.168.7.130` or `corp-proxy.domain` |
+| proxy.port                                   | Port of the Proxy (optional)         | | `100` |
+| proxy.user                                   | Proxy user name (optional)           | | `testUser`|
+| proxy.password                               | Proxy password (optional)            | | `testPassword` |
+| ssl (optional)                               | Configuration for ssl                | | |
+| ssl.enable                                   | SSL Enable (optional)                | false | `true` or `false` |
+| ssl.context                                  | SSL Version (optional)               | `TLSv1.2` | `TLSv1.1` |
+| ssl.check-validity                           | Check SSL validity (optional)        | false | `true` or `false` |
+| ssl.keystore.path                            | Keystore file path                   | | `classpath:keystore.jks` |
+| ssl.keystore.password                        | Keystore password                    | | `changeit` |
+| ssl.keystore.type                            | Keystore type (optional)             | `JKS` | `PKCS12` |
+| ssl.truststore.path                          | Truststore file path                 | | `classpath:truststore.jks` |
+| ssl.truststore.password                      | Truststore password                  | | `changeit` |
+| ssl.truststore.type                          | Truststore type (optional)           | `JKS` | `PKCS12` |
+| authorization.enable                         | Authorization enable (optional)      | false | `true` or `false` |
+| authorization.username                       | Authorization user name (optional)   | | `testUser`|
+| authorization.password                       | Authorization password (optional)    | | `testPassword` |
 
 Example:
 

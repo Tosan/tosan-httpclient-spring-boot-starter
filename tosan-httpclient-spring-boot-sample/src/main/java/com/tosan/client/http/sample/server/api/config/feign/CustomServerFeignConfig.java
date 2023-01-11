@@ -9,6 +9,7 @@ import com.tosan.client.http.starter.configuration.AbstractFeignConfiguration;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
 import com.tosan.client.http.starter.impl.feign.ExceptionExtractType;
+import com.tosan.client.http.starter.impl.feign.exception.FeignConfigurationException;
 import com.tosan.client.http.starter.impl.feign.exception.TosanWebServiceRuntimeException;
 import feign.*;
 import feign.codec.Decoder;
@@ -123,7 +124,7 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
     @Override
     @Bean("customServer-jacksonHttpMessageConverter")
     public HttpMessageConverter<Object> httpMessageConverter(@Qualifier("customServer-objectMapper")
-                                                                     ObjectMapper objectMapper) {
+                                                             ObjectMapper objectMapper) {
         return super.httpMessageConverter(objectMapper);
     }
 
@@ -187,7 +188,6 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
                                       @Qualifier("customServer-retryer") Retryer retryer,
                                       @Qualifier("customServer-feignLoggerLevel") Logger.Level logLevel,
                                       @Qualifier("customServer-feignErrorDecoder") CustomErrorDecoder customErrorDecoder) {
-
         return super.feignBuilder(feignClient, options, requestInterceptors, feignContract, feignDecoder, feignEncoder,
                 retryer, logLevel, customErrorDecoder);
     }
@@ -196,9 +196,9 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
     public CustomServerRestController clientServerRestController(
             @Qualifier("customServer-clientConfig") HttpClientProperties customServerClientConfig,
             @Qualifier("customServer-feignBuilder") Feign.Builder feignBuilder) {
-        return feignBuilder
-                .logger(new Slf4jLogger(CustomServerRestController.class))
-                .target(CustomServerRestController.class, customServerClientConfig.getBaseServiceUrl()
-                        + CustomServerRestController.PATH);
+        return getFeignController(customServerClientConfig.getBaseServiceUrl(), CustomServerRestController.PATH,
+                feignBuilder, CustomServerRestController.class);
     }
+
+
 }
