@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
  * @since 7/19/2022
  */
 public abstract class AbstractFeignConfiguration {
-    private ObjectFactory<HttpMessageConverters> messageConverters;
+    protected ObjectFactory<HttpMessageConverters> messageConverters;
 
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
