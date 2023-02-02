@@ -73,7 +73,7 @@ public class ConfigurableApacheHttpClientFactory extends DefaultApacheHttpClient
 
     private void configureConnectionManager(HttpClientBuilder builder) {
         final HttpClientConnectionManager connectionManager = clientConnectionManagerFactory
-                .newConnectionManager(httpClientProperties.getSsl().isCheckValidity(),
+                .newConnectionManager(!httpClientProperties.getSsl().isCheckValidity(),
                         httpClientProperties.getConnection().getMaxConnections(),
                         httpClientProperties.getConnection().getMaxConnectionsPerRoute(),
                         httpClientProperties.getConnection().getTimeToLive(),
