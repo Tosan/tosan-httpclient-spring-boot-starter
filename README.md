@@ -289,3 +289,13 @@ custom-service:
 
 You can find a sample project which configure `Feign` to use `Apache HttpClient`
 in tosan-httpclient-spring-boot-sample
+
+## Prerequisites
+This Library requires java version 8 or above and spring boot version 2.7.1 or above and spring cloud 2021.0.3 or above.
+
+## Contributing
+Any contribution is greatly appreciated.
+If you have a suggestion that would make this project better, please fork the repo and create a pull request.
+You can also simply open an issue with the tag "enhancement".
+## License
+The source files in this repository are available under the [Apache License Version 2.0](./LICENSE.txt).
