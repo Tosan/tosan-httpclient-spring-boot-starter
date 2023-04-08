@@ -2,8 +2,8 @@ package com.tosan.client.http.core.certificate;
 
 import com.tosan.client.http.core.HttpClientProperties;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.ssl.TrustStrategy;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.ssl.TrustStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ResourceUtils;

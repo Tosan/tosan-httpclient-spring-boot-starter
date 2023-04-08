@@ -1,6 +1,5 @@
 package com.tosan.client.http.sample.server.rest.exceptionhandler;
 
-
 import com.tosan.client.http.sample.server.api.exception.CustomServerException;
 import com.tosan.client.http.starter.impl.feign.ErrorObject;
 import org.springframework.http.HttpStatus;
@@ -15,9 +14,8 @@ import java.util.Map;
 
 /**
  * @author Ali Alimohammadi
- * @since ۱۴/۱۲/۲۰۲۰
+ * @since 12/14/2020
  */
-
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 

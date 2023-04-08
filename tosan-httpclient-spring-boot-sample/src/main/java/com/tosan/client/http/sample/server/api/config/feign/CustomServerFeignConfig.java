@@ -1,29 +1,27 @@
 package com.tosan.client.http.sample.server.api.config.feign;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tosan.client.http.core.HttpClientProperties;
+import com.tosan.client.http.core.factory.ConfigurableApacheHttpClientFactory;
 import com.tosan.client.http.sample.server.api.config.properties.CustomServerClientConfig;
 import com.tosan.client.http.sample.server.api.controller.CustomServerRestController;
 import com.tosan.client.http.sample.server.api.exception.CustomServerException;
-import com.tosan.client.http.core.HttpClientProperties;
 import com.tosan.client.http.starter.configuration.AbstractFeignConfiguration;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
 import com.tosan.client.http.starter.impl.feign.ExceptionExtractType;
-import com.tosan.client.http.starter.impl.feign.exception.FeignConfigurationException;
 import com.tosan.client.http.starter.impl.feign.exception.TosanWebServiceRuntimeException;
 import feign.*;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
-import feign.slf4j.Slf4jLogger;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.commons.httpclient.ApacheHttpClientConnectionManagerFactory;
-import org.springframework.cloud.commons.httpclient.ApacheHttpClientFactory;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,31 +54,31 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
 
     @Override
     @Bean("customServer-apacheHttpClientFactory")
-    public ApacheHttpClientFactory apacheHttpClientFactory(
+    public ConfigurableApacheHttpClientFactory apacheHttpClientFactory(
             @Qualifier("customServer-httpClientBuilder") HttpClientBuilder builder,
-            @Qualifier("customServer-connectionManagerFactory") ApacheHttpClientConnectionManagerFactory clientConnectionManagerFactory,
+            @Qualifier("customServer-connectionManagerFactory") PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder,
             @Qualifier("customServer-clientConfig") HttpClientProperties customServerClientConfig) {
-        return super.apacheHttpClientFactory(builder, clientConnectionManagerFactory, customServerClientConfig);
+        return super.apacheHttpClientFactory(builder, connectionManagerBuilder, customServerClientConfig);
     }
 
     @Override
     @Bean("customServer-clientHttpRequestFactory")
     public ClientHttpRequestFactory clientHttpRequestFactory(
-            @Qualifier("customServer-apacheHttpClientFactory") ApacheHttpClientFactory apacheHttpClientFactory) {
+            @Qualifier("customServer-apacheHttpClientFactory") ConfigurableApacheHttpClientFactory apacheHttpClientFactory) {
         return super.clientHttpRequestFactory(apacheHttpClientFactory);
     }
 
     @Override
     @Bean("customServer-httpclient")
     public CloseableHttpClient httpClient(
-            @Qualifier("customServer-apacheHttpClientFactory") ApacheHttpClientFactory apacheHttpClientFactory) {
+            @Qualifier("customServer-apacheHttpClientFactory") ConfigurableApacheHttpClientFactory apacheHttpClientFactory) {
         return super.httpClient(apacheHttpClientFactory);
     }
 
     @Override
     @Bean("customServer-connectionManagerFactory")
-    public ApacheHttpClientConnectionManagerFactory connectionManagerFactory() {
-        return super.connectionManagerFactory();
+    public PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder() {
+        return super.connectionManagerBuilder();
     }
 
     @Override
@@ -199,6 +197,4 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
         return getFeignController(customServerClientConfig.getBaseServiceUrl(), CustomServerRestController.PATH,
                 feignBuilder, CustomServerRestController.class);
     }
-
-
 }

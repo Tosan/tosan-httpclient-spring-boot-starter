@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * AutoConfiguration for the Feign
+ * AutoConfiguration for Feign
  *
  * @author Ali Alimohammadi
  * @since 1/22/2021

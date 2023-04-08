@@ -1,17 +1,17 @@
 package com.tosan.client.http.sample.restclient.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tosan.client.http.core.factory.ConfigurableApacheHttpClientFactory;
 import com.tosan.client.http.sample.restclient.exception.ExceptionHandler;
 import com.tosan.client.http.core.HttpClientProperties;
 import com.tosan.client.http.resttemplate.starter.configuration.AbstractHttpClientConfiguration;
 import com.tosan.client.http.resttemplate.starter.impl.ExternalServiceInvoker;
 import com.tosan.client.http.resttemplate.starter.util.HttpLoggingInterceptorUtil;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.cloud.commons.httpclient.ApacheHttpClientConnectionManagerFactory;
-import org.springframework.cloud.commons.httpclient.ApacheHttpClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -49,17 +49,17 @@ public class ExternalServiceConfiguration extends AbstractHttpClientConfiguratio
 
     @Bean("external-apacheHttpClientFactory")
     @Override
-    public ApacheHttpClientFactory apacheHttpClientFactory(
+    public ConfigurableApacheHttpClientFactory apacheHttpClientFactory(
             @Qualifier("external-apacheHttpClientBuilder") HttpClientBuilder builder,
-            @Qualifier("external-connectionManagerFactory") ApacheHttpClientConnectionManagerFactory connectionManagerFactory,
+            @Qualifier("external-connectionManagerFactory") PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder,
             @Qualifier("external-clientConfig") HttpClientProperties httpClientProperties) {
-        return super.apacheHttpClientFactory(builder, connectionManagerFactory, httpClientProperties);
+        return super.apacheHttpClientFactory(builder, connectionManagerBuilder, httpClientProperties);
     }
 
     @Bean("external-clientHttpRequestFactory")
     @Override
     public ClientHttpRequestFactory clientHttpRequestFactory(
-            @Qualifier("external-apacheHttpClientFactory") ApacheHttpClientFactory apacheHttpClientFactory) {
+            @Qualifier("external-apacheHttpClientFactory") ConfigurableApacheHttpClientFactory apacheHttpClientFactory) {
         return super.clientHttpRequestFactory(apacheHttpClientFactory);
     }
 
@@ -71,8 +71,8 @@ public class ExternalServiceConfiguration extends AbstractHttpClientConfiguratio
 
     @Bean("external-connectionManagerFactory")
     @Override
-    public ApacheHttpClientConnectionManagerFactory connectionManagerFactory() {
-        return super.connectionManagerFactory();
+    public PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder() {
+        return super.connectionManagerBuilder();
     }
 
     @Bean("external-httpMessageConverter")

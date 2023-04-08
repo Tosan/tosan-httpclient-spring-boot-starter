@@ -9,11 +9,9 @@ import com.tosan.client.http.core.factory.ConfigurableApacheHttpClientFactory;
 import com.tosan.client.http.resttemplate.starter.impl.ExternalServiceInvoker;
 import com.tosan.client.http.resttemplate.starter.impl.interceptor.HttpLoggingInterceptor;
 import com.tosan.client.http.resttemplate.starter.util.HttpLoggingInterceptorUtil;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.cloud.commons.httpclient.ApacheHttpClientConnectionManagerFactory;
-import org.springframework.cloud.commons.httpclient.ApacheHttpClientFactory;
-import org.springframework.cloud.commons.httpclient.DefaultApacheHttpClientConnectionManagerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -48,14 +46,14 @@ public abstract class AbstractHttpClientConfiguration {
 
     public abstract HttpClientProperties clientConfig();
 
-    public ApacheHttpClientFactory apacheHttpClientFactory(
+    public ConfigurableApacheHttpClientFactory apacheHttpClientFactory(
             HttpClientBuilder builder,
-            ApacheHttpClientConnectionManagerFactory connectionManagerFactory,
+            PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder,
             HttpClientProperties httpClientProperties) {
-        return new ConfigurableApacheHttpClientFactory(builder, connectionManagerFactory, httpClientProperties);
+        return new ConfigurableApacheHttpClientFactory(builder, connectionManagerBuilder, httpClientProperties);
     }
 
-    public ClientHttpRequestFactory clientHttpRequestFactory(ApacheHttpClientFactory apacheHttpClientFactory) {
+    public ClientHttpRequestFactory clientHttpRequestFactory(ConfigurableApacheHttpClientFactory apacheHttpClientFactory) {
         return new HttpComponentsClientHttpRequestFactory(apacheHttpClientFactory.createBuilder().build());
     }
 
@@ -63,8 +61,8 @@ public abstract class AbstractHttpClientConfiguration {
         return HttpClientBuilder.create();
     }
 
-    public ApacheHttpClientConnectionManagerFactory connectionManagerFactory() {
-        return new DefaultApacheHttpClientConnectionManagerFactory();
+    public PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder() {
+        return PoolingHttpClientConnectionManagerBuilder.create();
     }
 
     public HttpMessageConverter<Object> httpMessageConverter(ObjectMapper objectMapper) {

@@ -14,17 +14,15 @@ import feign.auth.BasicAuthRequestInterceptor;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
-import feign.httpclient.ApacheHttpClient;
+import feign.hc5.ApacheHttp5Client;
 import feign.slf4j.Slf4jLogger;
-import org.apache.http.client.HttpClient;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.http.ContentType;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
-import org.springframework.cloud.commons.httpclient.ApacheHttpClientConnectionManagerFactory;
-import org.springframework.cloud.commons.httpclient.ApacheHttpClientFactory;
-import org.springframework.cloud.commons.httpclient.DefaultApacheHttpClientConnectionManagerFactory;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringEncoder;
@@ -55,26 +53,27 @@ public abstract class AbstractFeignConfiguration {
         return objectMapper;
     }
 
-    public ApacheHttpClientFactory apacheHttpClientFactory(HttpClientBuilder builder,
-                                                           ApacheHttpClientConnectionManagerFactory clientConnectionManagerFactory,
+    public ConfigurableApacheHttpClientFactory apacheHttpClientFactory(HttpClientBuilder builder,
+                                                           PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder,
                                                            HttpClientProperties customServerClientConfig) {
-        return new ConfigurableApacheHttpClientFactory(builder, clientConnectionManagerFactory, customServerClientConfig);
+        return new ConfigurableApacheHttpClientFactory(builder, connectionManagerBuilder, customServerClientConfig);
     }
 
-    public ClientHttpRequestFactory clientHttpRequestFactory(ApacheHttpClientFactory apacheHttpClientFactory) {
+    public ClientHttpRequestFactory clientHttpRequestFactory(ConfigurableApacheHttpClientFactory apacheHttpClientFactory) {
         return new HttpComponentsClientHttpRequestFactory(apacheHttpClientFactory.createBuilder().build());
     }
 
-    public CloseableHttpClient httpClient(ApacheHttpClientFactory apacheHttpClientFactory) {
+    public CloseableHttpClient httpClient(ConfigurableApacheHttpClientFactory apacheHttpClientFactory) {
+        //todo: closeable
         return apacheHttpClientFactory.createBuilder().build();
     }
 
-    public ApacheHttpClientConnectionManagerFactory connectionManagerFactory() {
-        return new DefaultApacheHttpClientConnectionManagerFactory();
+    public PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder() {
+        return PoolingHttpClientConnectionManagerBuilder.create();
     }
 
     public Client feignClient(HttpClient httpClient) {
-        return new ApacheHttpClient(httpClient);
+        return new ApacheHttp5Client(httpClient);
     }
 
     public RequestInterceptor requestInterceptor() {
@@ -167,27 +166,27 @@ public abstract class AbstractFeignConfiguration {
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
-                                    Class<T> classType) {
+                                             Class<T> classType) {
         return createFeignController(baseServiceUrl, controllerPath, feignBuilder, classType, new Slf4jLogger(classType));
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
-                                    Class<T> classType, Logger logger) {
+                                             Class<T> classType, Logger logger) {
         return createFeignController(baseServiceUrl, controllerPath, feignBuilder, classType, logger);
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, Feign.Builder feignBuilder,
-                                    Class<T> classType) {
+                                             Class<T> classType) {
         return createFeignController(baseServiceUrl, null, feignBuilder, classType, new Slf4jLogger(classType));
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, Feign.Builder feignBuilder,
-                                    Class<T> classType, Logger logger) {
+                                             Class<T> classType, Logger logger) {
         return createFeignController(baseServiceUrl, null, feignBuilder, classType, logger);
     }
 
     private <T> T createFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
-                                          Class<T> classType, Logger logger) {
+                                        Class<T> classType, Logger logger) {
         if (baseServiceUrl == null) {
             throw new FeignConfigurationException("base service url for feign client can not be null.");
         }

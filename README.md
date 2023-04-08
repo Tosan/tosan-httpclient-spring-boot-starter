@@ -3,6 +3,8 @@
 This project provides two Spring-Boot Starter that enables the additional configuration of the used Httpclients and
 FeignClient for produce sdk or rest template client.
 
+This Library requires java version 17 or above and spring boot version 3.0.2 and above.
+
 ## Usage
 To use these starters, it is enough to add the following dependencies to the project based on your needs so that
 the configuration are brought to the project, therefore you only need to add it as a maven dependency.
@@ -289,3 +291,13 @@ custom-service:
 
 You can find a sample project which configure `Feign` to use `Apache HttpClient`
 in tosan-httpclient-spring-boot-sample
+
+## Prerequisites
+This Library requires java version 17 or above and spring boot version 3.0.3 and above.
+
+## Contributing
+Any contribution is greatly appreciated.
+If you have a suggestion that would make this project better, please fork the repo and create a pull request.
+You can also simply open an issue with the tag "enhancement".
+## License
+The source files in this repository are available under the [Apache License Version 2.0](./LICENSE.txt).

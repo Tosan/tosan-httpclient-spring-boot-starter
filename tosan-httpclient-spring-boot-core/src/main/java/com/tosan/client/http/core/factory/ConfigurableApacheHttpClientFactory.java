@@ -1,30 +1,30 @@
 package com.tosan.client.http.core.factory;
 
-import com.tosan.client.http.core.certificate.CertificateLoader;
 import com.tosan.client.http.core.HttpClientProperties;
+import com.tosan.client.http.core.certificate.CertificateLoader;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.ssl.DefaultHostnameVerifier;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.ProxyAuthenticationStrategy;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.DefaultAuthenticationStrategy;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.util.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.commons.httpclient.ApacheHttpClientConnectionManagerFactory;
-import org.springframework.cloud.commons.httpclient.DefaultApacheHttpClientFactory;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.security.KeyStore;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Factory used to create a HttpClient Instance
@@ -32,62 +32,61 @@ import java.util.TimerTask;
  * @author Ali Alimohammadi
  * @since 1/22/2021
  */
-public class ConfigurableApacheHttpClientFactory extends DefaultApacheHttpClientFactory {
+public class ConfigurableApacheHttpClientFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurableApacheHttpClientFactory.class);
     private final HttpClientProperties httpClientProperties;
-    private final ApacheHttpClientConnectionManagerFactory clientConnectionManagerFactory;
+    private final HttpClientBuilder httpClientBuilder;
+    private final PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder;
     private final Timer connectionManagerTimer = new Timer("FeignApacheHttpClientConfiguration.connectionManagerTimer", true);
 
-    public ConfigurableApacheHttpClientFactory(HttpClientBuilder builder,
-                                               ApacheHttpClientConnectionManagerFactory connectionManagerFactory,
+    public ConfigurableApacheHttpClientFactory(HttpClientBuilder httpClientBuilder,
+                                               PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder,
                                                HttpClientProperties httpClientProperties) {
-        super(builder);
+        this.httpClientBuilder = httpClientBuilder;
         this.httpClientProperties = httpClientProperties;
-        this.clientConnectionManagerFactory = connectionManagerFactory;
+        this.connectionManagerBuilder = connectionManagerBuilder;
     }
 
-    @Override
     public HttpClientBuilder createBuilder() {
-        HttpClientBuilder builder = super.createBuilder();
-        configureTimeouts(builder);
-        configureConnectionManager(builder);
-        String baseServiceUrl = httpClientProperties.getBaseServiceUrl();
-        if (baseServiceUrl != null && baseServiceUrl.startsWith("https")) {
-            configureSSL(builder);
-        }
+        configureTimeouts(httpClientBuilder);
+        configureConnectionManager(httpClientBuilder);
         HttpClientProperties.ProxyConfiguration proxyConfig = httpClientProperties.getProxy();
         if (proxyConfig.isEnable()) {
-            configureProxy(builder, proxyConfig);
-            configureAuthentication(builder, proxyConfig);
+            configureProxy(httpClientBuilder, proxyConfig);
+            configureAuthentication(httpClientBuilder, proxyConfig);
         }
 
-        return builder;
+        return httpClientBuilder;
     }
 
     private void configureTimeouts(HttpClientBuilder builder) {
         builder.setDefaultRequestConfig(RequestConfig.custom()
-                .setConnectTimeout(httpClientProperties.getConnection().getConnectionTimeout())
-                .setSocketTimeout(httpClientProperties.getConnection().getSocketTimeout())
+                .setConnectTimeout(httpClientProperties.getConnection().getConnectionTimeout(), TimeUnit.MILLISECONDS)
+                .setConnectionRequestTimeout(httpClientProperties.getConnection().getSocketTimeout(), TimeUnit.MILLISECONDS)
                 .build());
     }
 
     private void configureConnectionManager(HttpClientBuilder builder) {
-        final HttpClientConnectionManager connectionManager = clientConnectionManagerFactory
-                .newConnectionManager(!httpClientProperties.getSsl().isCheckValidity(),
-                        httpClientProperties.getConnection().getMaxConnections(),
-                        httpClientProperties.getConnection().getMaxConnectionsPerRoute(),
-                        httpClientProperties.getConnection().getTimeToLive(),
-                        httpClientProperties.getConnection().getTimeToLiveUnit(), null);
+        TimeValue timeToLive = TimeValue.of(httpClientProperties.getConnection().getTimeToLive(),
+                httpClientProperties.getConnection().getTimeToLiveUnit());
+        connectionManagerBuilder
+                .setMaxConnTotal(httpClientProperties.getConnection().getMaxConnections())
+                .setMaxConnPerRoute(httpClientProperties.getConnection().getMaxConnectionsPerRoute())
+                .setConnectionTimeToLive(timeToLive);
+        String baseServiceUrl = httpClientProperties.getBaseServiceUrl();
+        if (baseServiceUrl != null && baseServiceUrl.startsWith("https")) {
+            configureSSL(connectionManagerBuilder);
+        }
+        PoolingHttpClientConnectionManager connectionManager = connectionManagerBuilder.build();
         this.connectionManagerTimer.schedule(new TimerTask() {
             public void run() {
-                connectionManager.closeExpiredConnections();
+                connectionManager.closeExpired();
             }
-        }, 30000L, (long) httpClientProperties.getConnection().getConnectionTimerRepeat());
-
+        }, 30000L, httpClientProperties.getConnection().getConnectionTimerRepeat());
         builder.setConnectionManager(connectionManager);
     }
 
-    private void configureSSL(HttpClientBuilder builder) {
+    private void configureSSL(PoolingHttpClientConnectionManagerBuilder builder) {
         HttpClientProperties.SSLConfiguration sslConfiguration = httpClientProperties.getSsl();
         KeyStore trustStore = CertificateLoader.getTrustStore(sslConfiguration);
         KeyStore keyStore = CertificateLoader.getKeyStore(sslConfiguration);
@@ -102,7 +101,7 @@ public class ConfigurableApacheHttpClientFactory extends DefaultApacheHttpClient
 
         if (sslContext != null) {
             SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
-            builder.setSSLSocketFactory(sslSocketFactory).build();
+            builder.setSSLSocketFactory(sslSocketFactory);
         } else {
             LOGGER.warn("Invalid SSL Context, skipping");
         }
@@ -117,18 +116,18 @@ public class ConfigurableApacheHttpClientFactory extends DefaultApacheHttpClient
     }
 
     private void configureAuthentication(HttpClientBuilder builder, HttpClientProperties.ProxyConfiguration proxyConfig) {
-        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         boolean hasCredentials = false;
         if (StringUtils.isNoneBlank(proxyConfig.getUser(), proxyConfig.getPassword())) {
             credentialsProvider.setCredentials(
                     new AuthScope(proxyConfig.getHost(), Integer.parseInt(proxyConfig.getPort())),
-                    new UsernamePasswordCredentials(proxyConfig.getUser(), proxyConfig.getPassword()));
+                    new UsernamePasswordCredentials(proxyConfig.getUser(), proxyConfig.getPassword().toCharArray()));
             hasCredentials = true;
         }
 
         if (hasCredentials) {
             builder.setDefaultCredentialsProvider(credentialsProvider);
-            builder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
+            builder.setProxyAuthenticationStrategy(new DefaultAuthenticationStrategy());
         }
     }
 }
