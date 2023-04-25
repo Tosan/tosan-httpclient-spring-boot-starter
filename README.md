@@ -5,6 +5,9 @@ FeignClient for produce sdk or rest template client.
 
 This Library requires java version 17 or above and spring boot version 3.0.2 and above.
 
+## Documentation
+The Tosan Http Client Spring Boot Starter maintains documentation, release notes and migration guide in GitHub [wiki pages](https://github.com/Tosan/tosan-httpclient-spring-boot-starter/wiki).
+
 ## Usage
 To use these starters, it is enough to add the following dependencies to the project based on your needs so that
 the configuration are brought to the project, therefore you only need to add it as a maven dependency.
