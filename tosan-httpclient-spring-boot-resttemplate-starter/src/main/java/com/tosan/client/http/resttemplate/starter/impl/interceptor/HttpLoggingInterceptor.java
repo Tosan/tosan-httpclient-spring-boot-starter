@@ -28,16 +28,23 @@ public class HttpLoggingInterceptor implements ClientHttpRequestInterceptor {
 
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] requestBody, ClientHttpRequestExecution ex) {
-        log.info(httpLoggingInterceptorUtil.getRequestDetailContent(request, requestBody, webServiceName));
+        if (log.isInfoEnabled()) {
+            log.info(httpLoggingInterceptorUtil.getRequestDetailContent(request, requestBody, webServiceName));
+        }
         ClientHttpResponse response;
-        HttpResponseWrapper responseWrapper;
         try {
             response = ex.execute(request, requestBody);
-            responseWrapper = new HttpResponseWrapper(response);
-            log.info(httpLoggingInterceptorUtil.getResponseDetailContent(responseWrapper, webServiceName));
-            return responseWrapper;
+            if (log.isInfoEnabled()) {
+                HttpResponseWrapper responseWrapper = new HttpResponseWrapper(response);
+                log.info(httpLoggingInterceptorUtil.getResponseDetailContent(responseWrapper, webServiceName));
+                return responseWrapper;
+            } else {
+                return response;
+            }
         } catch (IOException e) {
-            log.info(httpLoggingInterceptorUtil.getExceptionDetailContent(e, webServiceName));
+            if (log.isInfoEnabled()) {
+                log.info(httpLoggingInterceptorUtil.getExceptionDetailContent(e, webServiceName));
+            }
             throw new HttpClientRequestExecuteException(e.getMessage(), e);
         }
     }
