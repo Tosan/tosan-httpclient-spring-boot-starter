@@ -22,9 +22,13 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.openfeign.AnnotatedParameterProcessor;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.cloud.openfeign.FeignFormatterRegistrar;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 
@@ -103,9 +107,16 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
 
     @Override
     @Bean("customServer-feignContract")
-    public Contract feignContract() {
-        return super.feignContract();
+    public Contract feignContractWithCustomSpringConversion(ConversionService feignConversionService, List<AnnotatedParameterProcessor> processors) {
+        return super.feignContractWithCustomSpringConversion(feignConversionService, processors);
     }
+
+    @Override
+    @Bean("customServer-feignConversionService")
+    public FormattingConversionService feignConversionService(List<FeignFormatterRegistrar> feignFormatterRegistrars) {
+        return super.feignConversionService(feignFormatterRegistrars);
+    }
+
 
     @Override
     @Bean("customServer-feignEncoder")

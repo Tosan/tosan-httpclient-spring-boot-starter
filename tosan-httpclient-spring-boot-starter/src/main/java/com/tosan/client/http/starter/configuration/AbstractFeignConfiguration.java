@@ -23,10 +23,15 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.core5.http.ContentType;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.cloud.openfeign.AnnotatedParameterProcessor;
+import org.springframework.cloud.openfeign.FeignFormatterRegistrar;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -98,6 +103,19 @@ public abstract class AbstractFeignConfiguration {
 
     public Contract feignContract() {
         return new SpringMvcContract();
+    }
+
+    public Contract feignContractWithCustomSpringConversion(ConversionService feignConversionService,
+                                                      List<AnnotatedParameterProcessor> processors) {
+        return new SpringMvcContract(processors, feignConversionService);
+    }
+
+    public FormattingConversionService feignConversionService(List<FeignFormatterRegistrar> feignFormatterRegistrars) {
+        FormattingConversionService conversionService = new DefaultFormattingConversionService();
+        for (FeignFormatterRegistrar feignFormatterRegistrar : feignFormatterRegistrars) {
+            feignFormatterRegistrar.registerFormatters(conversionService);
+        }
+        return conversionService;
     }
 
     public Encoder feignEncoder(HttpMessageConverter<Object> httpMessageConverter) {
