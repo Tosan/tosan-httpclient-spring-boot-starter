@@ -3,6 +3,7 @@ package com.tosan.client.http.sample.client;
 import com.tosan.client.http.sample.server.api.controller.CustomServerRestController;
 import com.tosan.client.http.sample.server.api.exception.InvalidParameterException;
 import com.tosan.client.http.sample.server.api.exception.RequiredParameterException;
+import com.tosan.client.http.sample.server.api.model.Context;
 import com.tosan.client.http.sample.server.api.model.GetInfoRequestDto;
 import com.tosan.client.http.sample.server.api.model.GetInfoResponseDto;
 import com.tosan.client.http.starter.impl.feign.exception.FeignClientRequestExecuteException;
@@ -62,6 +63,21 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
             log.error("InternalServerError Exception:", e);
         }
 
+        try {
+            Context context = new Context();
+            context.setUsername("ali");
+            context.setPassword("ali110");
+
+            response = customServerClient.login(context);
+            log.info("FeignClient Info: {}", response.toString());
+        } catch (UnknownException e) {
+            log.error("FeignClient Unknown exception with status Code 4xx:{}", e.toString());
+        } catch (FeignClientRequestExecuteException e) {
+            log.error("FeignClientRequestExecute Exception:", e);
+        } catch (InternalServerException e) {
+            log.error("InternalServerError Exception:", e);
+        }
+
         request.setSsn(null);
         try {
             response = customServerClient.getInfo(request, httpHeaders);
@@ -80,7 +96,7 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
 
         request.setSsn("");
         try {
-            response = customServerClient.getInfo(request,httpHeaders);
+            response = customServerClient.getInfo(request, httpHeaders);
             log.info("FeignClient Info: {}", response.toString());
         } catch (InvalidParameterException e) {
             log.error("FeignClient Info exception:{}", e.toString());

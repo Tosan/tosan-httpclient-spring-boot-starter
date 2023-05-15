@@ -25,10 +25,15 @@ import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.commons.httpclient.ApacheHttpClientConnectionManagerFactory;
 import org.springframework.cloud.commons.httpclient.ApacheHttpClientFactory;
 import org.springframework.cloud.commons.httpclient.DefaultApacheHttpClientConnectionManagerFactory;
+import org.springframework.cloud.openfeign.AnnotatedParameterProcessor;
+import org.springframework.cloud.openfeign.FeignFormatterRegistrar;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -101,6 +106,19 @@ public abstract class AbstractFeignConfiguration {
         return new SpringMvcContract();
     }
 
+    public Contract feignContractWithCustomSpringConversion(ConversionService feignConversionService,
+                                                            List<AnnotatedParameterProcessor> processors) {
+        return new SpringMvcContract(processors, feignConversionService);
+    }
+
+    public FormattingConversionService feignConversionService(List<FeignFormatterRegistrar> feignFormatterRegistrars) {
+        FormattingConversionService conversionService = new DefaultFormattingConversionService();
+        for (FeignFormatterRegistrar feignFormatterRegistrar : feignFormatterRegistrars) {
+            feignFormatterRegistrar.registerFormatters(conversionService);
+        }
+        return conversionService;
+    }
+
     public Encoder feignEncoder(HttpMessageConverter<Object> httpMessageConverter) {
         return new SpringFormEncoder(new SpringEncoder(messageConverters));
     }
@@ -167,27 +185,27 @@ public abstract class AbstractFeignConfiguration {
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
-                                    Class<T> classType) {
+                                             Class<T> classType) {
         return createFeignController(baseServiceUrl, controllerPath, feignBuilder, classType, new Slf4jLogger(classType));
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
-                                    Class<T> classType, Logger logger) {
+                                             Class<T> classType, Logger logger) {
         return createFeignController(baseServiceUrl, controllerPath, feignBuilder, classType, logger);
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, Feign.Builder feignBuilder,
-                                    Class<T> classType) {
+                                             Class<T> classType) {
         return createFeignController(baseServiceUrl, null, feignBuilder, classType, new Slf4jLogger(classType));
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, Feign.Builder feignBuilder,
-                                    Class<T> classType, Logger logger) {
+                                             Class<T> classType, Logger logger) {
         return createFeignController(baseServiceUrl, null, feignBuilder, classType, logger);
     }
 
     private <T> T createFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
-                                          Class<T> classType, Logger logger) {
+                                        Class<T> classType, Logger logger) {
         if (baseServiceUrl == null) {
             throw new FeignConfigurationException("base service url for feign client can not be null.");
         }

@@ -1,20 +1,18 @@
 package com.tosan.client.http.sample.server.api.config.feign;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tosan.client.http.core.HttpClientProperties;
 import com.tosan.client.http.sample.server.api.config.properties.CustomServerClientConfig;
 import com.tosan.client.http.sample.server.api.controller.CustomServerRestController;
 import com.tosan.client.http.sample.server.api.exception.CustomServerException;
-import com.tosan.client.http.core.HttpClientProperties;
 import com.tosan.client.http.starter.configuration.AbstractFeignConfiguration;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
 import com.tosan.client.http.starter.impl.feign.ExceptionExtractType;
-import com.tosan.client.http.starter.impl.feign.exception.FeignConfigurationException;
 import com.tosan.client.http.starter.impl.feign.exception.TosanWebServiceRuntimeException;
 import feign.*;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
-import feign.slf4j.Slf4jLogger;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -24,9 +22,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.commons.httpclient.ApacheHttpClientConnectionManagerFactory;
 import org.springframework.cloud.commons.httpclient.ApacheHttpClientFactory;
+import org.springframework.cloud.openfeign.AnnotatedParameterProcessor;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.cloud.openfeign.FeignFormatterRegistrar;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 
@@ -105,9 +107,15 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
 
     @Override
     @Bean("customServer-feignContract")
-    public Contract feignContract() {
-        return super.feignContract();
+    public Contract feignContractWithCustomSpringConversion(ConversionService feignConversionService, List<AnnotatedParameterProcessor> processors) {
+        return super.feignContractWithCustomSpringConversion(feignConversionService, processors);
     }
+
+    @Bean("customServer-feignConversionService")
+    public FormattingConversionService feignConversionService(List<FeignFormatterRegistrar> feignFormatterRegistrars) {
+        return super.feignConversionService(feignFormatterRegistrars);
+    }
+
 
     @Override
     @Bean("customServer-feignEncoder")

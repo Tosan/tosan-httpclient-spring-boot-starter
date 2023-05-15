@@ -3,6 +3,7 @@ package com.tosan.client.http.sample.server.rest.controller;
 import com.tosan.client.http.sample.server.api.controller.CustomServerRestController;
 import com.tosan.client.http.sample.server.api.exception.InvalidParameterException;
 import com.tosan.client.http.sample.server.api.exception.RequiredParameterException;
+import com.tosan.client.http.sample.server.api.model.Context;
 import com.tosan.client.http.sample.server.api.model.GetInfoRequestDto;
 import com.tosan.client.http.sample.server.api.model.GetInfoResponseDto;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(CustomServerRestController.PATH)
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class CustomServerRestControllerImpl implements CustomServerRestController {
+
+    @Override
+    public GetInfoResponseDto login(Context context) {
+        GetInfoResponseDto getInfoResponseDto = new GetInfoResponseDto();
+        getInfoResponseDto.setFirstName("ali");
+        getInfoResponseDto.setLastName("alimohammadi");
+        return getInfoResponseDto;
+    }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
