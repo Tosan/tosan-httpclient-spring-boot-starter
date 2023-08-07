@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.tosan.client.http</groupId>
         <artifactId>tosan-httpclient-spring-boot-root</artifactId>
-        <version>3.0.4-SNAPSHOT</version>
+        <version>3.1.0</version>
     </parent>
 
     <artifactId>tosan-httpclient-spring-boot-starter</artifactId>
