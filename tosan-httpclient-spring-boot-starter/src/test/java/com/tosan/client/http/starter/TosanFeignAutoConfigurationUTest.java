@@ -1,9 +1,10 @@
 package com.tosan.client.http.starter;
 
-import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.configuration.TosanFeignAutoConfiguration;
+import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
 import com.tosan.client.http.starter.impl.feign.aspect.FeignUndeclaredThrowableExceptionAspect;
+import com.tosan.tools.mask.starter.configuration.MaskBeanConfiguration;
 import feign.Feign;
 import feign.codec.ErrorDecoder;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ public class TosanFeignAutoConfigurationUTest {
 
     @Test
     public void customErrorDecoder() {
-        this.contextRunner.withUserConfiguration(TosanFeignAutoConfiguration.class)
+        this.contextRunner.withUserConfiguration(TosanFeignAutoConfiguration.class, MaskBeanConfiguration.class)
                 .run(ctx -> {
                     assertThat(ctx).hasSingleBean(CustomErrorDecoder.class);
                     assertThat(ctx.getBean(CustomErrorDecoder.class)).isInstanceOf(ErrorDecoder.class);
@@ -33,7 +34,7 @@ public class TosanFeignAutoConfigurationUTest {
 
     @Test
     public void feignUndeclaredThrowableExceptionAspect() {
-        this.contextRunner.withUserConfiguration(TosanFeignAutoConfiguration.class)
+        this.contextRunner.withUserConfiguration(TosanFeignAutoConfiguration.class, MaskBeanConfiguration.class)
                 .run(ctx -> assertThat(ctx).hasSingleBean(FeignUndeclaredThrowableExceptionAspect.class));
     }
 
@@ -46,7 +47,7 @@ public class TosanFeignAutoConfigurationUTest {
 
     @Test
     public void customErrorDecoderConfig() {
-        this.contextRunner.withUserConfiguration(TosanFeignAutoConfiguration.class)
+        this.contextRunner.withUserConfiguration(TosanFeignAutoConfiguration.class, MaskBeanConfiguration.class)
                 .run(ctx -> assertThat(ctx).hasSingleBean(CustomErrorDecoderConfig.class));
     }
 

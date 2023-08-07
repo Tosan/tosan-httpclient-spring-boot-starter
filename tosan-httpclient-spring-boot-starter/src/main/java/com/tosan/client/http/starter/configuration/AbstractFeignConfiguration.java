@@ -4,18 +4,24 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.tosan.client.http.core.Constants;
 import com.tosan.client.http.core.HttpClientProperties;
 import com.tosan.client.http.core.factory.ConfigurableApacheHttpClientFactory;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
 import com.tosan.client.http.starter.impl.feign.exception.FeignConfigurationException;
+import com.tosan.client.http.starter.impl.feign.logger.HttpFeignClientLogger;
+import com.tosan.tools.mask.starter.config.SecureParameter;
+import com.tosan.tools.mask.starter.config.SecureParametersConfig;
+import com.tosan.tools.mask.starter.replace.JacksonReplaceHelper;
+import com.tosan.tools.mask.starter.replace.JsonReplaceHelperDecider;
+import com.tosan.tools.mask.starter.replace.RegexReplaceHelper;
 import feign.*;
 import feign.auth.BasicAuthRequestInterceptor;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
 import feign.httpclient.ApacheHttpClient;
-import feign.slf4j.Slf4jLogger;
 import org.apache.http.client.HttpClient;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -41,8 +47,11 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static com.tosan.tools.mask.starter.configuration.MaskBeanConfiguration.SECURED_PARAMETERS;
 
 /**
  * @author Ali Alimohammadi
@@ -58,6 +67,23 @@ public abstract class AbstractFeignConfiguration {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         return objectMapper;
+    }
+
+    public JsonReplaceHelperDecider replaceHelperDecider(JacksonReplaceHelper jacksonReplaceHelper,
+                                                         RegexReplaceHelper regexReplaceHelper,
+                                                         SecureParametersConfig secureParametersConfig) {
+        return new JsonReplaceHelperDecider(jacksonReplaceHelper, regexReplaceHelper, secureParametersConfig);
+    }
+
+    public SecureParametersConfig secureParametersConfig() {
+        HashSet<SecureParameter> securedParameters = new HashSet<>(SECURED_PARAMETERS);
+        securedParameters.add(Constants.AUTHORIZATION_SECURE_PARAM);
+        securedParameters.add(Constants.PROXY_AUTHORIZATION_SECURE_PARAM);
+        return new SecureParametersConfig(securedParameters);
+    }
+
+    public Logger httpFeignClientLogger(JsonReplaceHelperDecider replaceHelperDecider, String serverName) {
+        return new HttpFeignClientLogger(serverName, replaceHelperDecider);
     }
 
     public ApacheHttpClientFactory apacheHttpClientFactory(HttpClientBuilder builder,
@@ -172,7 +198,8 @@ public abstract class AbstractFeignConfiguration {
                                       Encoder feignEncoder,
                                       Retryer retryer,
                                       Logger.Level logLevel,
-                                      CustomErrorDecoder customErrorDecoder) {
+                                      CustomErrorDecoder customErrorDecoder,
+                                      Logger logger) {
         return Feign.builder().client(feignClient)
                 .options(options)
                 .encoder(feignEncoder)
@@ -181,12 +208,13 @@ public abstract class AbstractFeignConfiguration {
                 .contract(feignContract)
                 .requestInterceptors(requestInterceptors)
                 .retryer(retryer)
+                .logger(logger)
                 .logLevel(logLevel);
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
                                              Class<T> classType) {
-        return createFeignController(baseServiceUrl, controllerPath, feignBuilder, classType, new Slf4jLogger(classType));
+        return createFeignController(baseServiceUrl, controllerPath, feignBuilder, classType);
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
@@ -196,7 +224,7 @@ public abstract class AbstractFeignConfiguration {
 
     protected final <T> T getFeignController(String baseServiceUrl, Feign.Builder feignBuilder,
                                              Class<T> classType) {
-        return createFeignController(baseServiceUrl, null, feignBuilder, classType, new Slf4jLogger(classType));
+        return createFeignController(baseServiceUrl, null, feignBuilder, classType);
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, Feign.Builder feignBuilder,
@@ -212,6 +240,16 @@ public abstract class AbstractFeignConfiguration {
 
         return feignBuilder
                 .logger(logger)
+                .target(classType, controllerPath != null ? baseServiceUrl + controllerPath : baseServiceUrl);
+    }
+
+    private <T> T createFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
+                                        Class<T> classType) {
+        if (baseServiceUrl == null) {
+            throw new FeignConfigurationException("base service url for feign client can not be null.");
+        }
+
+        return feignBuilder
                 .target(classType, controllerPath != null ? baseServiceUrl + controllerPath : baseServiceUrl);
     }
 }

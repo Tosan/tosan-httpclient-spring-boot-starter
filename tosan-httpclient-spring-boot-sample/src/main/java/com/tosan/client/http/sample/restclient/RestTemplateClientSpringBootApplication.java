@@ -12,11 +12,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClientException;
+import org.springframework.http.*;
 
 /**
  * @author Ali Alimohammadi
@@ -56,8 +52,20 @@ public class RestTemplateClientSpringBootApplication implements CommandLineRunne
                     .getRestTemplate().postForEntity(externalInvoker.generateUrl("/info"),
                             new HttpEntity<>(request, httpHeaders), GetInfoResponseDto.class);
             log.info("Response Info: {}", response);
-        } catch (RestClientException e) {
-            log.error("RestClient Info exception:", e);
+        }  catch (HttpClientRequestWrapperException e) {
+            log.error("HttpClientRequestWrapperException Info exception:", e);
+        } catch (FeignClientRequestExecuteException e) {
+            log.error("FeignClientRequestExecute Exception:", e);
+        }
+
+        try {
+            response = externalInvoker.getRestTemplate()
+                    .exchange(externalInvoker.generateUrl("/login"), HttpMethod.GET,
+                            new HttpEntity<>(null, httpHeaders), GetInfoResponseDto.class);
+
+            log.info("Response Info: {}", response);
+        }  catch (HttpClientRequestWrapperException e) {
+            log.error("HttpClientRequestWrapperException Info exception:", e);
         } catch (FeignClientRequestExecuteException e) {
             log.error("FeignClientRequestExecute Exception:", e);
         }

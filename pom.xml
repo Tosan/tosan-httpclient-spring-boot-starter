@@ -9,15 +9,14 @@
 
     <name>tosan-httpclient-spring-boot-starter</name>
     <description>This project provides a Spring-Boot Starter that enables the additional configuration of the used
-        Httpclients and
-        FeignClient.
+        Httpclient and FeignClient.
     </description>
     <url>https://github.com/Tosan/tosan-httpclient-spring-boot-starter</url>
 
     <licenses>
         <license>
             <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
 
@@ -26,10 +25,9 @@
             <name>Ali Alimohammadi</name>
             <email>a.alimohammadi@tosan.com</email>
             <organization>tosan</organization>
-            <organizationUrl>http://www.tosan.com</organizationUrl>
+            <organizationUrl>https://www.tosan.com</organizationUrl>
         </developer>
     </developers>
-
 
     <modules>
         <module>tosan-httpclient-spring-boot-core</module>
@@ -37,7 +35,6 @@
         <module>tosan-httpclient-spring-boot-resttemplate-starter</module>
         <module>tosan-httpclient-spring-boot-sample</module>
     </modules>
-
 
     <scm>
         <connection>scm:git:https://github.com/Tosan/tosan-httpclient-spring-boot-starter.git</connection>
@@ -48,9 +45,9 @@
     </scm>
 
     <properties>
-        <spring-boot.version>2.7.1</spring-boot.version>
-        <spring-cloud.version>2021.0.3</spring-cloud.version>
-        <feign.version>12.0</feign.version>
+        <spring-boot.version>2.7.14</spring-boot.version>
+        <spring-cloud.version>2021.0.8</spring-cloud.version>
+        <feign.version>12.4</feign.version>
         <java.version>8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.test.skip>false</maven.test.skip>
