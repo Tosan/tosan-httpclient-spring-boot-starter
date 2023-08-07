@@ -44,15 +44,15 @@ public class HttpLoggingInterceptorUtil {
 
     public String getRequestDetailContent(HttpRequest request, byte[] body, String webServiceName) {
         final Map<String, Object> requestData = new LinkedHashMap<>();
-        requestData.put("systemName", webServiceName);
+        requestData.put("invoke", webServiceName);
         String urlString = request.getURI().toString();
         boolean hasQueryString = urlString.contains("?");
         if (hasQueryString) {
             String[] splitUrl = urlString.split("[?]");
             String maskedQueryString = splitUrl.length > 1 ? getMaskedQueryString(splitUrl[1]) : "";
-            requestData.put("+service", request.getMethod() + " " + splitUrl[0] + "?" + maskedQueryString);
+            requestData.put("service", request.getMethod() + " " + splitUrl[0] + "?" + maskedQueryString);
         } else {
-            requestData.put("+service", request.getMethod() + " " + urlString);
+            requestData.put("service", request.getMethod() + " " + urlString);
         }
         if (!request.getHeaders().isEmpty()) {
             requestData.put("headers", getMaskedHeaders(request.getHeaders()));
@@ -66,8 +66,8 @@ public class HttpLoggingInterceptorUtil {
 
     public String getResponseDetailContent(ClientHttpResponse response, String webServiceName) throws IOException {
         final Map<String, Object> responseData = new LinkedHashMap<>();
-        responseData.put("systemName", webServiceName);
-        responseData.put("-service", response.getStatusCode());
+        responseData.put("invoked", webServiceName);
+        responseData.put("status", response.getStatusCode());
         if (!response.getHeaders().isEmpty()) {
             responseData.put("headers", getMaskedHeaders(response.getHeaders()));
         }
@@ -81,9 +81,9 @@ public class HttpLoggingInterceptorUtil {
 
     public String getExceptionDetailContent(Exception exception, String webServiceName) {
         final Map<String, Object> exceptionData = new LinkedHashMap<>();
-        exceptionData.put("systemName", webServiceName);
-        exceptionData.put("-serviceException", exception.getClass().getSimpleName());
-        exceptionData.put("cause", exception.getMessage());
+        exceptionData.put("invoked", webServiceName);
+        exceptionData.put("exception", exception.getClass().getSimpleName());
+        exceptionData.put("message", exception.getMessage());
         return toJson(exceptionData);
     }
 
@@ -94,11 +94,13 @@ public class HttpLoggingInterceptorUtil {
             List<String> headerValues = entry.getValue();
             List<String> maskedHeaderValues = new ArrayList<>();
             headerValues.forEach(headerValue -> {
-                JsonReplaceResultDto jsonReplaceResultDto = replaceHelperDecider.checkJsonAndReplace(headerValue);
-                if (!jsonReplaceResultDto.isJson()) {
-                    maskedHeaderValues.add(replaceHelperDecider.replace(headerName, headerValue));
-                } else {
-                    maskedHeaderValues.add(jsonReplaceResultDto.getReplacedJson());
+                if (headerValue != null && headerValue.length() > 0) {
+                    JsonReplaceResultDto jsonReplaceResultDto = replaceHelperDecider.checkJsonAndReplace(headerValue);
+                    if (!jsonReplaceResultDto.isJson()) {
+                        maskedHeaderValues.add(replaceHelperDecider.replace(headerName, headerValue));
+                    } else {
+                        maskedHeaderValues.add(jsonReplaceResultDto.getReplacedJson());
+                    }
                 }
             });
             securedHeaders.put(headerName, maskedHeaderValues);

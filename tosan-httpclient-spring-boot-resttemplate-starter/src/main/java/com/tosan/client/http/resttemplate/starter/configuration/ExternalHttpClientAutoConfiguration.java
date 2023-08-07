@@ -1,6 +1,6 @@
 package com.tosan.client.http.resttemplate.starter.configuration;
 
-import com.tosan.client.http.resttemplate.starter.util.Constants;
+import com.tosan.client.http.core.Constants;
 import com.tosan.client.http.resttemplate.starter.util.HttpLoggingInterceptorUtil;
 import com.tosan.tools.mask.starter.config.SecureParameter;
 import com.tosan.tools.mask.starter.config.SecureParametersConfig;
@@ -20,9 +20,7 @@ import static com.tosan.tools.mask.starter.configuration.MaskBeanConfiguration.S
 public class ExternalHttpClientAutoConfiguration {
 
     @Bean({"http-client-util-regex-replace-helper"})
-    @ConditionalOnMissingBean(
-            name = {"http-client-util-regex-replace-helper"}
-    )
+    @ConditionalOnMissingBean(name = "http-client-util-regex-replace-helper")
     public JsonReplaceHelperDecider replaceHelperDecider(JacksonReplaceHelper jacksonReplaceHelper,
                                                          RegexReplaceHelper regexReplaceHelper,
                                                          @Qualifier("http-client-util-secured-parameters")
@@ -31,9 +29,7 @@ public class ExternalHttpClientAutoConfiguration {
     }
 
     @Bean({"http-client-util-secured-parameters"})
-    @ConditionalOnMissingBean(
-            name = {"http-client-util-secured-parameters"}
-    )
+    @ConditionalOnMissingBean(name = "http-client-util-secured-parameters")
     public SecureParametersConfig secureParametersConfig() {
         HashSet<SecureParameter> securedParameters = new HashSet<>(SECURED_PARAMETERS);
         securedParameters.add(Constants.AUTHORIZATION_SECURE_PARAM);

@@ -35,7 +35,7 @@ public class TosanFeignAutoConfiguration {
     }
 
     @Bean
-    FeignUndeclaredThrowableExceptionAspect undeclaredThrowableExceptionAspect() {
+    public FeignUndeclaredThrowableExceptionAspect undeclaredThrowableExceptionAspect() {
         return new FeignUndeclaredThrowableExceptionAspect();
     }
 

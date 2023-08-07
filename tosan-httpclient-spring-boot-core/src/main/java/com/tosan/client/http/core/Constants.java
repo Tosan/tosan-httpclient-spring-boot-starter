@@ -1,4 +1,4 @@
-package com.tosan.client.http.resttemplate.starter.util;
+package com.tosan.client.http.core;
 
 import com.tosan.tools.mask.starter.business.enumeration.MaskType;
 import com.tosan.tools.mask.starter.config.SecureParameter;
