@@ -36,6 +36,10 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
         this.customErrorDecoderConfig = customErrorDecoderConfig;
     }
 
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
+
     @Override
     public Exception decode(String methodKey, Response response) {
         try {
@@ -48,51 +52,57 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
                     responseBody);
             Map<String, Class<? extends Exception>> exceptionMap = customErrorDecoderConfig.getExceptionMap();
             if (status >= 400 && status < 500) {
-                ErrorObject errorObject = jsonToObject(responseBody, ErrorObject.class);
-                String errorType = errorObject.getErrorType();
-                String errorCode = errorObject.getErrorCode();
-                String errorKey = errorType + "." + errorCode;
-                Class<? extends Exception> exceptionClass = exceptionMap.get(errorKey);
-                if (exceptionClass != null) {
-                    return jsonToObject(responseBody, exceptionClass);
-                } else {
-                    UnknownException unknownException = jsonToObject(responseBody, UnknownException.class);
-                    unknownException.setJsonResponse(responseBody);
-                    return unknownException;
-                }
+                return extractBadRequestErrorException(responseBody, exceptionMap);
             }
-            InternalServerException internalServerException = jsonToObject(responseBody, InternalServerException.class);
-            if (internalServerException.getErrorParam() == null) {
-                Map<String, Object> errorMap = new HashMap<>();
-                internalServerException.setErrorParam(errorMap);
-            }
-            String errorType = internalServerException.getErrorType();
-            String errorCode = internalServerException.getErrorCode();
-            String errorKey = errorType + "." + errorCode;
-            Class<? extends Exception> cause = exceptionMap.get(errorKey);
-            internalServerException.getErrorParam().put("httpStatusCode", status);
-            internalServerException.getErrorParam().put("cause", cause);
-            internalServerException.setJsonResponse(responseBody);
-            return internalServerException;
+            return extractInternalServerErrorException(responseBody, status, exceptionMap);
         } catch (Exception e) {
-            LOGGER.warn("ServerInternalRuntimeException", e);
-            InternalServerException internalServerException = new InternalServerException("Internal error", e);
-            internalServerException.setErrorType("customErrorDecoder");
-            internalServerException.setErrorCode(e.getClass().getSimpleName());
-            Map<String, Object> exceptionErrorMap = new HashMap<>();
-            exceptionErrorMap.put("localizedMessage", e.getLocalizedMessage());
-            internalServerException.setErrorParam(exceptionErrorMap);
-            internalServerException.setMessage(e.getMessage());
-            return internalServerException;
+            return extractCustomErrorDecoderException(e);
         }
     }
 
-    private <T> T jsonToObject(String string, Class<T> type) {
-        try {
-            return objectMapper.readValue(string, type);
-        } catch (Exception e) {
-            throw new JsonConvertException("error in converting Json to object");
+    protected Exception extractBadRequestErrorException(String responseBody,
+                                                        Map<String, Class<? extends Exception>> exceptionMap) {
+        ErrorObject errorObject = jsonToObject(responseBody, ErrorObject.class);
+        String errorType = errorObject.getErrorType();
+        String errorCode = errorObject.getErrorCode();
+        String errorKey = errorType + "." + errorCode;
+        Class<? extends Exception> exceptionClass = exceptionMap.get(errorKey);
+        if (exceptionClass != null) {
+            return jsonToObject(responseBody, exceptionClass);
+        } else {
+            UnknownException unknownException = jsonToObject(responseBody, UnknownException.class);
+            unknownException.setJsonResponse(responseBody);
+            return unknownException;
         }
+    }
+
+    protected Exception extractCustomErrorDecoderException(Exception e) {
+        LOGGER.warn("ServerInternalRuntimeException", e);
+        InternalServerException internalServerException = new InternalServerException("Internal error", e);
+        internalServerException.setErrorType("customErrorDecoder");
+        internalServerException.setErrorCode(e.getClass().getSimpleName());
+        Map<String, Object> exceptionErrorMap = new HashMap<>();
+        exceptionErrorMap.put("localizedMessage", e.getLocalizedMessage());
+        internalServerException.setErrorParam(exceptionErrorMap);
+        internalServerException.setMessage(e.getMessage());
+        return internalServerException;
+    }
+
+    protected Exception extractInternalServerErrorException(String responseBody, int status,
+                                                            Map<String, Class<? extends Exception>> exceptionMap) {
+        InternalServerException internalServerException = jsonToObject(responseBody, InternalServerException.class);
+        if (internalServerException.getErrorParam() == null) {
+            Map<String, Object> errorMap = new HashMap<>();
+            internalServerException.setErrorParam(errorMap);
+        }
+        String errorType = internalServerException.getErrorType();
+        String errorCode = internalServerException.getErrorCode();
+        String errorKey = errorType + "." + errorCode;
+        Class<? extends Exception> cause = exceptionMap.get(errorKey);
+        internalServerException.getErrorParam().put("httpStatusCode", status);
+        internalServerException.getErrorParam().put("cause", cause);
+        internalServerException.setJsonResponse(responseBody);
+        return internalServerException;
     }
 
     @Override
@@ -128,6 +138,14 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
                     .stream().filter(clazz -> !Modifier.isAbstract(clazz.getModifiers())).forEach(this::extractAndFillMap);
             reflections.getSubTypesOf(uncheckedExceptionClass)
                     .stream().filter(clazz -> !Modifier.isAbstract(clazz.getModifiers())).forEach(this::extractAndFillMap);
+        }
+    }
+
+    protected  <T> T jsonToObject(String string, Class<T> type) {
+        try {
+            return objectMapper.readValue(string, type);
+        } catch (Exception e) {
+            throw new JsonConvertException("error in converting Json to object");
         }
     }
 

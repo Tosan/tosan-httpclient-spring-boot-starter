@@ -30,6 +30,10 @@ public abstract class TosanWebServiceException extends Exception implements Tosa
         return errorParam;
     }
 
+    public void setErrorParam(Map<String, Object> errorParam) {
+        this.errorParam = errorParam;
+    }
+
     public TosanWebServiceException addErrorParam(String key, Object value) {
         if (errorParam == null) {
             errorParam = new HashMap<>();
