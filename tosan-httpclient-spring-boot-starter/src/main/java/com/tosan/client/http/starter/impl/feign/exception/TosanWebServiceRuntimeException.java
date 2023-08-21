@@ -30,6 +30,9 @@ public abstract class TosanWebServiceRuntimeException extends RuntimeException i
         return errorParam;
     }
 
+    public void setErrorParam(Map<String, Object> errorParam) {
+        this.errorParam = errorParam;
+    }
     public TosanWebServiceRuntimeException addErrorParam(String key, Object value) {
         if (errorParam == null) {
             errorParam = new HashMap<>();
