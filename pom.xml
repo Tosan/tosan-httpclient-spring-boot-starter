@@ -94,7 +94,7 @@
             <dependency>
                 <groupId>com.tosan.tools</groupId>
                 <artifactId>tosan-mask-spring-boot-starter</artifactId>
-                <version>1.0.5</version>
+                <version>1.0.8</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
