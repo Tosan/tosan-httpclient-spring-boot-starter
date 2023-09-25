@@ -8,6 +8,7 @@ import java.util.Map;
  * @since 1/22/2021
  */
 public abstract class TosanWebServiceException extends Exception implements TosanWebServiceBaseException {
+    private static final long serialVersionUID = 7501000302649392364L;
     private Map<String, Object> errorParam;
     private String message;
 

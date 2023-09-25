@@ -156,7 +156,8 @@ public abstract class AbstractFeignConfiguration {
     public HttpMessageConverter<Object> httpMessageConverter(ObjectMapper objectMapper) {
         MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter =
                 new MappingJackson2HttpMessageConverter(objectMapper);
-        messageConverters = () -> new HttpMessageConverters(mappingJackson2HttpMessageConverter);
+        HttpMessageConverters httpMessageConverters = new HttpMessageConverters(mappingJackson2HttpMessageConverter);
+        messageConverters = () -> httpMessageConverters;
         return mappingJackson2HttpMessageConverter;
     }
 
