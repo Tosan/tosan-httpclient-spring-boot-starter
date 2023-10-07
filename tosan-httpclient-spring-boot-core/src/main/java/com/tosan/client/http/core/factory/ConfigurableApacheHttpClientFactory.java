@@ -61,9 +61,10 @@ public class ConfigurableApacheHttpClientFactory {
 
     private void configureTimeouts(HttpClientBuilder builder) {
         builder.setDefaultRequestConfig(RequestConfig.custom()
-                .setConnectTimeout(httpClientProperties.getConnection().getConnectionTimeout(), TimeUnit.MILLISECONDS)
-                .setConnectionRequestTimeout(httpClientProperties.getConnection().getSocketTimeout(), TimeUnit.MILLISECONDS)
-                .build());
+                        .setConnectTimeout(httpClientProperties.getConnection().getConnectionTimeout(), TimeUnit.MILLISECONDS)
+                        .setConnectionRequestTimeout(httpClientProperties.getConnection().getSocketTimeout(), TimeUnit.MILLISECONDS)
+                        .setRedirectsEnabled(httpClientProperties.getConnection().isFollowRedirects())
+                        .build());
     }
 
     private void configureConnectionManager(HttpClientBuilder builder) {
