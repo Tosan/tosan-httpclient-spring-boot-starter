@@ -1,7 +1,7 @@
 package com.tosan.client.http.core.factory;
 
-import com.tosan.client.http.core.certificate.CertificateLoader;
 import com.tosan.client.http.core.HttpClientProperties;
+import com.tosan.client.http.core.certificate.CertificateLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -68,6 +68,7 @@ public class ConfigurableApacheHttpClientFactory extends DefaultApacheHttpClient
         builder.setDefaultRequestConfig(RequestConfig.custom()
                 .setConnectTimeout(httpClientProperties.getConnection().getConnectionTimeout())
                 .setSocketTimeout(httpClientProperties.getConnection().getSocketTimeout())
+                .setRedirectsEnabled(httpClientProperties.getConnection().isFollowRedirects())
                 .build());
     }
 
