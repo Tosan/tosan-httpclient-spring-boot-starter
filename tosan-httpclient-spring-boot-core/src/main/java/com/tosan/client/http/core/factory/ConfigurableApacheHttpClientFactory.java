@@ -69,6 +69,7 @@ public class ConfigurableApacheHttpClientFactory extends DefaultApacheHttpClient
                 .setConnectTimeout(httpClientProperties.getConnection().getConnectionTimeout())
                 .setSocketTimeout(httpClientProperties.getConnection().getSocketTimeout())
                 .setRedirectsEnabled(httpClientProperties.getConnection().isFollowRedirects())
+                .setCookieSpec(httpClientProperties.getConnection().getCookieSpecPolicy())
                 .build());
     }
 
