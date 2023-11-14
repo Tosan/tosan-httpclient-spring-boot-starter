@@ -1,5 +1,6 @@
 package com.tosan.client.http.core;
 
+import org.apache.hc.client5.http.cookie.StandardCookieSpec;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
@@ -308,6 +309,8 @@ public class HttpClientProperties {
 
         private int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
 
+        private String cookieSpecPolicy = StandardCookieSpec.IGNORE;
+
 
         public int getMaxConnections() {
             return maxConnections;
@@ -371,6 +374,14 @@ public class HttpClientProperties {
 
         public void setSocketTimeout(int socketTimeout) {
             this.socketTimeout = socketTimeout;
+        }
+
+        public String getCookieSpecPolicy() {
+            return cookieSpecPolicy;
+        }
+
+        public void setCookieSpecPolicy(String cookieSpecPolicy) {
+            this.cookieSpecPolicy = cookieSpecPolicy;
         }
     }
 

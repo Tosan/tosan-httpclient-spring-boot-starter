@@ -64,6 +64,7 @@ public class ConfigurableApacheHttpClientFactory {
                         .setConnectTimeout(httpClientProperties.getConnection().getConnectionTimeout(), TimeUnit.MILLISECONDS)
                         .setConnectionRequestTimeout(httpClientProperties.getConnection().getSocketTimeout(), TimeUnit.MILLISECONDS)
                         .setRedirectsEnabled(httpClientProperties.getConnection().isFollowRedirects())
+                        .setCookieSpec(httpClientProperties.getConnection().getCookieSpecPolicy())
                         .build());
     }
 
