@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.RawValue;
+import com.tosan.client.http.starter.util.HttpReplaceHelperDecider;
 import com.tosan.tools.mask.starter.dto.JsonReplaceResultDto;
 import com.tosan.tools.mask.starter.replace.JsonReplaceHelperDecider;
 import feign.Request;
@@ -41,6 +42,14 @@ public class HttpFeignClientLogger extends feign.Logger {
 
     private final String webServiceName;
     private final JsonReplaceHelperDecider replaceHelperDecider;
+    private HttpReplaceHelperDecider httpReplaceHelperDecider;
+
+    public HttpFeignClientLogger(String webServiceName, JsonReplaceHelperDecider replaceHelperDecider,
+                                 HttpReplaceHelperDecider httpReplaceHelperDecider) {
+        this.webServiceName = webServiceName;
+        this.replaceHelperDecider = replaceHelperDecider;
+        this.httpReplaceHelperDecider = httpReplaceHelperDecider;
+    }
 
     public HttpFeignClientLogger(String webServiceName, JsonReplaceHelperDecider replaceHelperDecider) {
         this.webServiceName = webServiceName;
@@ -186,7 +195,12 @@ public class HttpFeignClientLogger extends feign.Logger {
                 if (headerValue != null && headerValue.length() > 0) {
                     JsonReplaceResultDto jsonReplaceResultDto = replaceHelperDecider.checkJsonAndReplace(headerValue);
                     if (!jsonReplaceResultDto.isJson()) {
-                        maskedHeaderValues.add(replaceHelperDecider.replace(headerName, headerValue));
+                        if (httpReplaceHelperDecider != null) {
+                            String replace = httpReplaceHelperDecider.keyValueHeaderReplace(headerValue);
+                            maskedHeaderValues.add(replaceHelperDecider.replace(headerName, replace));
+                        } else {
+                            maskedHeaderValues.add(replaceHelperDecider.replace(headerName, headerValue));
+                        }
                     } else {
                         maskedHeaderValues.add(jsonReplaceResultDto.getReplacedJson());
                     }

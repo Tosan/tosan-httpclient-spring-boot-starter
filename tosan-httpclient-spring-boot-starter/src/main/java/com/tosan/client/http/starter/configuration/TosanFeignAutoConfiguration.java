@@ -6,6 +6,9 @@ import com.tosan.client.http.starter.impl.feign.ExceptionExtractType;
 import com.tosan.client.http.starter.impl.feign.aspect.FeignUndeclaredThrowableExceptionAspect;
 import com.tosan.client.http.starter.impl.feign.exception.TosanWebServiceException;
 import com.tosan.client.http.starter.impl.feign.exception.TosanWebServiceRuntimeException;
+import com.tosan.client.http.starter.util.KeyValueReplaceHelper;
+import com.tosan.tools.mask.starter.business.ComparisonTypeFactory;
+import com.tosan.tools.mask.starter.business.ValueMaskFactory;
 import feign.Feign;
 import feign.codec.ErrorDecoder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -43,5 +46,12 @@ public class TosanFeignAutoConfiguration {
     @ConditionalOnMissingBean
     public ErrorDecoder customErrorDecoder(CustomErrorDecoderConfig customErrorDecoderConfig) {
         return new CustomErrorDecoder(customErrorDecoderConfig);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public KeyValueReplaceHelper keyValueReplaceHelper(ValueMaskFactory valueMaskFactory,
+                                                       ComparisonTypeFactory comparisonTypeFactory) {
+        return new KeyValueReplaceHelper(valueMaskFactory,comparisonTypeFactory);
     }
 }

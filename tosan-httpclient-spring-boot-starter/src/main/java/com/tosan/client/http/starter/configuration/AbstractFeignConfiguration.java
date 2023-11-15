@@ -11,6 +11,8 @@ import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
 import com.tosan.client.http.starter.impl.feign.exception.FeignConfigurationException;
 import com.tosan.client.http.starter.impl.feign.logger.HttpFeignClientLogger;
+import com.tosan.client.http.starter.util.HttpReplaceHelperDecider;
+import com.tosan.client.http.starter.util.KeyValueReplaceHelper;
 import com.tosan.tools.mask.starter.config.SecureParameter;
 import com.tosan.tools.mask.starter.config.SecureParametersConfig;
 import com.tosan.tools.mask.starter.replace.JacksonReplaceHelper;
@@ -40,6 +42,7 @@ import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -75,6 +78,11 @@ public abstract class AbstractFeignConfiguration {
         return new JsonReplaceHelperDecider(jacksonReplaceHelper, regexReplaceHelper, secureParametersConfig);
     }
 
+    public HttpReplaceHelperDecider httpReplaceHelperDecider(KeyValueReplaceHelper keyValueReplaceHelper,
+                                                             SecureParametersConfig secureParametersConfig) {
+        return new HttpReplaceHelperDecider(keyValueReplaceHelper, secureParametersConfig);
+    }
+
     public SecureParametersConfig secureParametersConfig() {
         HashSet<SecureParameter> securedParameters = new HashSet<>(SECURED_PARAMETERS);
         securedParameters.add(Constants.AUTHORIZATION_SECURE_PARAM);
@@ -84,6 +92,10 @@ public abstract class AbstractFeignConfiguration {
 
     public Logger httpFeignClientLogger(JsonReplaceHelperDecider replaceHelperDecider, String serverName) {
         return new HttpFeignClientLogger(serverName, replaceHelperDecider);
+    }
+    public Logger httpFeignClientLogger(JsonReplaceHelperDecider replaceHelperDecider,
+                                        HttpReplaceHelperDecider httpReplaceHelperDecider, String serverName) {
+        return new HttpFeignClientLogger(serverName, replaceHelperDecider, httpReplaceHelperDecider);
     }
 
     public ApacheHttpClientFactory apacheHttpClientFactory(HttpClientBuilder builder,

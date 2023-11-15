@@ -10,6 +10,8 @@ import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
 import com.tosan.client.http.starter.impl.feign.ExceptionExtractType;
 import com.tosan.client.http.starter.impl.feign.exception.TosanWebServiceRuntimeException;
+import com.tosan.client.http.starter.util.HttpReplaceHelperDecider;
+import com.tosan.client.http.starter.util.KeyValueReplaceHelper;
 import com.tosan.tools.mask.starter.config.SecureParametersConfig;
 import com.tosan.tools.mask.starter.replace.JacksonReplaceHelper;
 import com.tosan.tools.mask.starter.replace.JsonReplaceHelperDecider;
@@ -61,10 +63,20 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
         return super.replaceHelperDecider(jacksonReplaceHelper, regexReplaceHelper, secureParametersConfig);
     }
 
+    @Override
+    @Bean("customServer-http-replace-helper")
+    public HttpReplaceHelperDecider httpReplaceHelperDecider(KeyValueReplaceHelper keyValueReplaceHelper,
+                                                             @Qualifier("customServer-secured-parameters")
+                                                             SecureParametersConfig secureParametersConfig) {
+        return super.httpReplaceHelperDecider(keyValueReplaceHelper, secureParametersConfig);
+    }
+
     @Bean("customServer-httpFeignClientLogger")
     public Logger httpFeignClientLogger(@Qualifier("customServer-replace-helper")
-                                        JsonReplaceHelperDecider replaceHelperDecider) {
-        return super.httpFeignClientLogger(replaceHelperDecider, "custom-server");
+                                        JsonReplaceHelperDecider replaceHelperDecider,
+                                        @Qualifier("customServer-http-replace-helper")
+                                        HttpReplaceHelperDecider httpReplaceHelperDecider) {
+        return super.httpFeignClientLogger(replaceHelperDecider,httpReplaceHelperDecider, "custom-server");
     }
 
     @Bean("customServer-secured-parameters")
