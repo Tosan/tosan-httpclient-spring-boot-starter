@@ -45,9 +45,9 @@
     </scm>
 
     <properties>
-        <spring-boot.version>3.1.4</spring-boot.version>
+        <spring-boot.version>3.1.5</spring-boot.version>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
-        <tosan.mask.version>2.0.2</tosan.mask.version>
+        <tosan.mask.version>2.1.0</tosan.mask.version>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.test.skip>false</maven.test.skip>
