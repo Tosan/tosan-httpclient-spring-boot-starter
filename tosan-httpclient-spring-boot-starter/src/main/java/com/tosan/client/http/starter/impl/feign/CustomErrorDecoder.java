@@ -48,14 +48,14 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
             StreamUtils.copy(body.asInputStream(), output);
             String responseBody = output.toString();
             int status = response.status();
-            LOGGER.info("ServerErrorResponse :\n ResponseStatus:{}\n ResponseBody:{}", status,
-                    responseBody);
+            LOGGER.info("ServerErrorResponse :\n ResponseStatus:{}\n ResponseBody:{}", status, responseBody);
             Map<String, Class<? extends Exception>> exceptionMap = customErrorDecoderConfig.getExceptionMap();
             if (status >= 400 && status < 500) {
                 return extractBadRequestErrorException(responseBody, exceptionMap);
             }
             return extractInternalServerErrorException(responseBody, status, exceptionMap);
         } catch (Exception e) {
+            LOGGER.error("ServerInternalRuntimeException", e);
             return extractCustomErrorDecoderException(e);
         }
     }
@@ -77,7 +77,6 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
     }
 
     protected Exception extractCustomErrorDecoderException(Exception e) {
-        LOGGER.warn("ServerInternalRuntimeException", e);
         InternalServerException internalServerException = new InternalServerException("Internal error", e);
         internalServerException.setErrorType("customErrorDecoder");
         internalServerException.setErrorCode(e.getClass().getSimpleName());
@@ -108,7 +107,6 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
     @Override
     public void afterPropertiesSet() {
         ExceptionExtractType exceptionExtractType;
-
         if (customErrorDecoderConfig != null) {
             if (customErrorDecoderConfig.getObjectMapper() != null) {
                 objectMapper = customErrorDecoderConfig.getObjectMapper();
@@ -141,11 +139,11 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
         }
     }
 
-    protected  <T> T jsonToObject(String string, Class<T> type) {
+    protected <T> T jsonToObject(String string, Class<T> type) {
         try {
             return objectMapper.readValue(string, type);
         } catch (Exception e) {
-            throw new JsonConvertException("error in converting Json to object");
+            throw new JsonConvertException("error in converting Json to object", e);
         }
     }
 
@@ -168,8 +166,7 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
                 exceptionMap.put(exceptionKey, type);
             } catch (IllegalAccessException | NoSuchMethodException | InstantiationException |
                      InvocationTargetException e) {
-                LOGGER.warn("error on construction of {}.", type.getSimpleName());
-                LOGGER.warn("Exception:", e);
+                LOGGER.error("error on construction of " + type.getSimpleName(), e);
             }
         } else if (exceptionExtractType.equals(ExceptionExtractType.FULL_NAME_REFLECTION)) {
             exceptionMap.put(type.getName(), type);
