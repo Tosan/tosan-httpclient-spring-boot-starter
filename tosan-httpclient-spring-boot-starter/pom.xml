@@ -91,10 +91,6 @@
                     <artifactId>spring-boot-starter-logging</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcpkix-jdk15on</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>io.github.openfeign</groupId>
                     <artifactId>feign-core</artifactId>
                 </exclusion>

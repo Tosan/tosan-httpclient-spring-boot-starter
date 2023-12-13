@@ -75,12 +75,6 @@
                 <artifactId>tosan-mask-spring-boot-starter</artifactId>
                 <version>${tosan.mask.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk18on</artifactId>
-                <version>1.76</version>
-                <scope>runtime</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
