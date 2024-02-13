@@ -84,9 +84,10 @@ public abstract class AbstractFeignConfiguration {
         return new HttpFeignClientLogger(serverName, replaceHelperDecider);
     }
 
-    public ConfigurableApacheHttpClientFactory apacheHttpClientFactory(HttpClientBuilder builder,
-                                                                       PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder,
-                                                                       HttpClientProperties customServerClientConfig) {
+    public ConfigurableApacheHttpClientFactory apacheHttpClientFactory(
+            HttpClientBuilder builder,
+            PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder,
+            HttpClientProperties customServerClientConfig) {
         return new ConfigurableApacheHttpClientFactory(builder, connectionManagerBuilder, customServerClientConfig);
     }
 

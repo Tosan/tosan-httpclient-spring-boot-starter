@@ -54,16 +54,15 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
     }
 
     @Bean("customServer-replace-helper")
-    public JsonReplaceHelperDecider replaceHelperDecider(JacksonReplaceHelper jacksonReplaceHelper,
-                                                         RegexReplaceHelper regexReplaceHelper,
-                                                         @Qualifier("customServer-secured-parameters")
-                                                         SecureParametersConfig secureParametersConfig) {
+    public JsonReplaceHelperDecider replaceHelperDecider(
+            JacksonReplaceHelper jacksonReplaceHelper, RegexReplaceHelper regexReplaceHelper,
+            @Qualifier("customServer-secured-parameters") SecureParametersConfig secureParametersConfig) {
         return super.replaceHelperDecider(jacksonReplaceHelper, regexReplaceHelper, secureParametersConfig);
     }
 
     @Bean("customServer-httpFeignClientLogger")
-    public Logger httpFeignClientLogger(@Qualifier("customServer-replace-helper")
-                                        JsonReplaceHelperDecider replaceHelperDecider) {
+    public Logger httpFeignClientLogger(
+            @Qualifier("customServer-replace-helper") JsonReplaceHelperDecider replaceHelperDecider) {
         return super.httpFeignClientLogger(replaceHelperDecider, "custom-server");
     }
 
@@ -131,7 +130,8 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
 
     @Override
     @Bean("customServer-feignContract")
-    public Contract feignContractWithCustomSpringConversion(ConversionService feignConversionService, List<AnnotatedParameterProcessor> processors) {
+    public Contract feignContractWithCustomSpringConversion(
+            ConversionService feignConversionService, List<AnnotatedParameterProcessor> processors) {
         return super.feignContractWithCustomSpringConversion(feignConversionService, processors);
     }
 
@@ -144,26 +144,29 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
 
     @Override
     @Bean("customServer-feignEncoder")
-    public Encoder feignEncoder(@Qualifier("customServer-jacksonHttpMessageConverter") HttpMessageConverter<Object> httpMessageConverter) {
+    public Encoder feignEncoder(
+            @Qualifier("customServer-jacksonHttpMessageConverter") HttpMessageConverter<Object> httpMessageConverter) {
         return super.feignEncoder(httpMessageConverter);
     }
 
     @Override
     @Bean("customServer-feignDecoder")
-    public Decoder feignDecoder(@Qualifier("customServer-jacksonHttpMessageConverter") HttpMessageConverter<Object> httpMessageConverter) {
+    public Decoder feignDecoder(
+            @Qualifier("customServer-jacksonHttpMessageConverter") HttpMessageConverter<Object> httpMessageConverter) {
         return super.feignDecoder(httpMessageConverter);
     }
 
     @Override
     @Bean("customServer-jacksonHttpMessageConverter")
-    public HttpMessageConverter<Object> httpMessageConverter(@Qualifier("customServer-objectMapper")
-                                                             ObjectMapper objectMapper) {
+    public HttpMessageConverter<Object> httpMessageConverter(
+            @Qualifier("customServer-objectMapper") ObjectMapper objectMapper) {
         return super.httpMessageConverter(objectMapper);
     }
 
     @Override
     @Bean("customServer-feignErrorDecoderConfig")
-    public CustomErrorDecoderConfig customErrorDecoderConfig(@Qualifier("customServer-objectMapper") ObjectMapper objectMapper) {
+    public CustomErrorDecoderConfig customErrorDecoderConfig(
+            @Qualifier("customServer-objectMapper") ObjectMapper objectMapper) {
         CustomErrorDecoderConfig customErrorDecoderConfig = new CustomErrorDecoderConfig();
         customErrorDecoderConfig.getScanPackageList().add("com.tosan.client.http.sample.server.api.exception");
         customErrorDecoderConfig.setExceptionExtractType(ExceptionExtractType.EXCEPTION_IDENTIFIER_FIELDS);
@@ -175,7 +178,8 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
 
     @Override
     @Bean("customServer-feignErrorDecoder")
-    public CustomErrorDecoder customErrorDecoder(@Qualifier("customServer-feignErrorDecoderConfig") CustomErrorDecoderConfig customErrorDecoderConfig) {
+    public CustomErrorDecoder customErrorDecoder(
+            @Qualifier("customServer-feignErrorDecoderConfig") CustomErrorDecoderConfig customErrorDecoderConfig) {
         return super.customErrorDecoder(customErrorDecoderConfig);
     }
 
@@ -187,18 +191,14 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
 
     @Override
     @Bean("customServer-retryer")
-    @ConditionalOnMissingBean(
-            name = {"customServer-retryer"}
-    )
+    @ConditionalOnMissingBean(name = {"customServer-retryer"})
     public Retryer retryer() {
         return super.retryer();
     }
 
     @Override
     @Bean("customServer-feignLoggerLevel")
-    @ConditionalOnMissingBean(
-            name = {"customServer-feignLoggerLevel"}
-    )
+    @ConditionalOnMissingBean(name = {"customServer-feignLoggerLevel"})
     public Logger.Level feignLoggerLevel() {
         return super.feignLoggerLevel();
     }

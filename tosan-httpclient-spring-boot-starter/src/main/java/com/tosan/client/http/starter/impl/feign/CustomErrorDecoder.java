@@ -14,9 +14,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StreamUtils;
 
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,11 +44,9 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
     public Exception decode(String methodKey, Response response) {
         try {
             Response.Body body = response.body();
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            StreamUtils.copy(body.asInputStream(), output);
-            String responseBody = output.toString();
+            String responseBody = StreamUtils.copyToString(body.asInputStream(), StandardCharsets.UTF_8);
             int status = response.status();
-            LOGGER.info("ServerErrorResponse :\n ResponseStatus:{}\n ResponseBody:{}", status, responseBody);
+            LOGGER.info("ServerErrorResponse:\n ResponseStatus: {}\n ResponseBody: {}", status, responseBody);
             Map<String, Class<? extends Exception>> exceptionMap = customErrorDecoderConfig.getExceptionMap();
             if (status >= 400 && status < 500) {
                 return extractBadRequestErrorException(responseBody, exceptionMap);

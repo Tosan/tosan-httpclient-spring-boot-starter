@@ -94,7 +94,7 @@ public class HttpLoggingInterceptorUtil {
             List<String> headerValues = entry.getValue();
             List<String> maskedHeaderValues = new ArrayList<>();
             headerValues.forEach(headerValue -> {
-                if (headerValue != null && headerValue.length() > 0) {
+                if (headerValue != null && !headerValue.isEmpty()) {
                     JsonReplaceResultDto jsonReplaceResultDto = replaceHelperDecider.checkJsonAndReplace(headerValue);
                     if (!jsonReplaceResultDto.isJson()) {
                         maskedHeaderValues.add(replaceHelperDecider.replace(headerName, headerValue));
@@ -135,5 +135,4 @@ public class HttpLoggingInterceptorUtil {
             return "error creating json. " + exception.getMessage();
         }
     }
-
 }
