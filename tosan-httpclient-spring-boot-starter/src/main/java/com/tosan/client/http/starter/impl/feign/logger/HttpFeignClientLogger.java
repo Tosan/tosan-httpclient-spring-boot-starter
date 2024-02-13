@@ -92,7 +92,7 @@ public class HttpFeignClientLogger extends feign.Logger {
             responseData.put("invoked", webServiceName);
             int status = response.status();
             responseData.put("service", getServiceName(methodTag(configKey)));
-            responseData.put("duration", elapsedTime + "ms");
+            responseData.put("duration", elapsedTime / 1000.0 + "s");
             responseData.put("status", status);
             if (logLevel.ordinal() >= Level.HEADERS.ordinal()) {
                 if (!response.headers().isEmpty()) {
@@ -120,7 +120,7 @@ public class HttpFeignClientLogger extends feign.Logger {
             Map<String, Object> exceptionData = new LinkedHashMap<>();
             exceptionData.put("invoked", webServiceName);
             exceptionData.put("service", getServiceName(methodTag(configKey)));
-            exceptionData.put("duration", elapsedTime + "ms");
+            exceptionData.put("duration", elapsedTime / 1000.0 + "s");
             exceptionData.put("exception", ioe.getClass().getSimpleName());
             exceptionData.put("message", ioe.getMessage());
             if (logLevel.ordinal() >= Level.FULL.ordinal() && logger.isDebugEnabled()) {
@@ -183,7 +183,7 @@ public class HttpFeignClientLogger extends feign.Logger {
             Collection<String> headerValues = entry.getValue();
             Collection<String> maskedHeaderValues = new ArrayList<>();
             headerValues.forEach(headerValue -> {
-                if (headerValue != null && headerValue.length() > 0) {
+                if (headerValue != null && !headerValue.isEmpty()) {
                     JsonReplaceResultDto jsonReplaceResultDto = replaceHelperDecider.checkJsonAndReplace(headerValue);
                     if (!jsonReplaceResultDto.isJson()) {
                         maskedHeaderValues.add(replaceHelperDecider.replace(headerName, headerValue));
