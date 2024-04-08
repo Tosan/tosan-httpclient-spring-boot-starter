@@ -27,6 +27,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.core5.http.ContentType;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.openfeign.AnnotatedParameterProcessor;
@@ -49,6 +50,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.tosan.client.http.core.Constants.*;
 import static com.tosan.tools.mask.starter.configuration.MaskBeanConfiguration.SECURED_PARAMETERS;
 
 /**
@@ -110,8 +112,14 @@ public abstract class AbstractFeignConfiguration {
 
     public RequestInterceptor requestInterceptor() {
         return requestTemplate -> {
-            requestTemplate.header("Accept", ContentType.APPLICATION_JSON.getMimeType());
-            requestTemplate.header("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
+            requestTemplate.header(ACCEPT_HEADER, ContentType.APPLICATION_JSON.getMimeType());
+            requestTemplate.header(CONTENT_TYPE_HEADER, ContentType.APPLICATION_JSON.getMimeType());
+            if (MDC.get(MDC_REQUEST_ID) != null) {
+                requestTemplate.header(X_REQUEST_ID, MDC.get(MDC_REQUEST_ID));
+            }
+            if (MDC.get(MDC_CLIENT_IP) != null) {
+                requestTemplate.header(X_USER_IP, MDC.get(MDC_CLIENT_IP));
+            }
         };
     }
 
