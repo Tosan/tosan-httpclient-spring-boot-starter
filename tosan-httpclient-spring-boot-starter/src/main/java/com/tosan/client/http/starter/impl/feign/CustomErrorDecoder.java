@@ -46,7 +46,8 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
             Response.Body body = response.body();
             String responseBody = StreamUtils.copyToString(body.asInputStream(), StandardCharsets.UTF_8);
             int status = response.status();
-            LOGGER.info("ServerErrorResponse:\n ResponseStatus: {}\n ResponseBody: {}", status, responseBody);
+            LOGGER.info("ServerErrorResponse :\n ResponseStatus:{}\n ResponseBody:{}", status,
+                    responseBody);
             Map<String, Class<? extends Exception>> exceptionMap = customErrorDecoderConfig.getExceptionMap();
             if (status >= 400 && status < 500) {
                 return extractBadRequestErrorException(responseBody, exceptionMap);
