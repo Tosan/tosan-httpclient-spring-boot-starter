@@ -32,18 +32,21 @@ public class HttpLoggingInterceptor implements ClientHttpRequestInterceptor {
             log.info(httpLoggingInterceptorUtil.getRequestDetailContent(request, requestBody, webServiceName));
         }
         ClientHttpResponse response;
+        long startTime = System.currentTimeMillis();
         try {
             response = ex.execute(request, requestBody);
             if (log.isInfoEnabled()) {
                 HttpResponseWrapper responseWrapper = new HttpResponseWrapper(response);
-                log.info(httpLoggingInterceptorUtil.getResponseDetailContent(responseWrapper, webServiceName));
+                log.info(httpLoggingInterceptorUtil.getResponseDetailContent(responseWrapper, webServiceName,
+                        System.currentTimeMillis() - startTime));
                 return responseWrapper;
             } else {
                 return response;
             }
         } catch (IOException e) {
             if (log.isInfoEnabled()) {
-                log.info(httpLoggingInterceptorUtil.getExceptionDetailContent(e, webServiceName));
+                log.info(httpLoggingInterceptorUtil.getExceptionDetailContent(e, webServiceName,
+                        System.currentTimeMillis() - startTime));
             }
             throw new HttpClientRequestExecuteException(e.getMessage(), e);
         }
