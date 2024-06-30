@@ -5,6 +5,7 @@ import com.tosan.client.http.core.certificate.CertificateLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.DefaultAuthenticationStrategy;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
@@ -16,6 +17,7 @@ import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.util.TimeValue;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +26,6 @@ import javax.net.ssl.SSLContext;
 import java.security.KeyStore;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Factory used to create a HttpClient Instance
@@ -48,7 +49,7 @@ public class ConfigurableApacheHttpClientFactory {
     }
 
     public HttpClientBuilder createBuilder() {
-        configureTimeouts(httpClientBuilder);
+        configureRequest(httpClientBuilder);
         configureConnectionManager(httpClientBuilder);
         HttpClientProperties.ProxyConfiguration proxyConfig = httpClientProperties.getProxy();
         if (proxyConfig.isEnable()) {
@@ -59,22 +60,22 @@ public class ConfigurableApacheHttpClientFactory {
         return httpClientBuilder;
     }
 
-    private void configureTimeouts(HttpClientBuilder builder) {
+    private void configureRequest(HttpClientBuilder builder) {
         builder.setDefaultRequestConfig(RequestConfig.custom()
-                        .setConnectTimeout(httpClientProperties.getConnection().getConnectionTimeout(), TimeUnit.MILLISECONDS)
-                        .setConnectionRequestTimeout(httpClientProperties.getConnection().getSocketTimeout(), TimeUnit.MILLISECONDS)
-                        .setRedirectsEnabled(httpClientProperties.getConnection().isFollowRedirects())
-                        .setCookieSpec(httpClientProperties.getConnection().getCookieSpecPolicy())
-                        .build());
+                .setRedirectsEnabled(httpClientProperties.getConnection().isFollowRedirects())
+                .setCookieSpec(httpClientProperties.getConnection().getCookieSpecPolicy())
+                .build());
     }
 
     private void configureConnectionManager(HttpClientBuilder builder) {
-        TimeValue timeToLive = TimeValue.of(httpClientProperties.getConnection().getTimeToLive(),
-                httpClientProperties.getConnection().getTimeToLiveUnit());
         connectionManagerBuilder
                 .setMaxConnTotal(httpClientProperties.getConnection().getMaxConnections())
                 .setMaxConnPerRoute(httpClientProperties.getConnection().getMaxConnectionsPerRoute())
-                .setConnectionTimeToLive(timeToLive);
+                .setDefaultConnectionConfig(ConnectionConfig.custom()
+                        .setConnectTimeout(Timeout.ofMilliseconds(httpClientProperties.getConnection().getConnectionTimeout()))
+                        .setSocketTimeout(Timeout.ofMilliseconds(httpClientProperties.getConnection().getSocketTimeout()))
+                        .setTimeToLive(TimeValue.ofMilliseconds(httpClientProperties.getConnection().getTimeToLive()))
+                        .build());
         String baseServiceUrl = httpClientProperties.getBaseServiceUrl();
         if (baseServiceUrl != null && baseServiceUrl.startsWith("https")) {
             configureSSL(connectionManagerBuilder);

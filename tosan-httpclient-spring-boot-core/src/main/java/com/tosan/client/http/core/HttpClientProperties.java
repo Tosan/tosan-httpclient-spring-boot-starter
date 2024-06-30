@@ -4,8 +4,6 @@ import org.apache.hc.client5.http.cookie.StandardCookieSpec;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * @author Ali Alimohammadi
  * @since 1/22/2021
@@ -260,14 +258,9 @@ public class HttpClientProperties {
         public static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 50;
 
         /**
-         * Default value for time to live.
+         * Default value for time to live in milliseconds.
          */
-        public static final long DEFAULT_TIME_TO_LIVE = 900L;
-
-        /**
-         * Default time to live unit.
-         */
-        public static final TimeUnit DEFAULT_TIME_TO_LIVE_UNIT = TimeUnit.SECONDS;
+        public static final long DEFAULT_TIME_TO_LIVE = 900000L;
 
         /**
          * Default value for following redirects.
@@ -275,7 +268,7 @@ public class HttpClientProperties {
         public static final boolean DEFAULT_FOLLOW_REDIRECTS = true;
 
         /**
-         * Default value for connection timeout.
+         * Default value for connection timeout in milliseconds.
          * A timeout value of zero is interpreted as an infinite timeout.
          * A negative value is interpreted as undefined (system default if applicable).
          */
@@ -287,7 +280,7 @@ public class HttpClientProperties {
         public static final int DEFAULT_CONNECTION_TIMER_REPEAT = 3000;
 
         /**
-         * Default value for socket timeout.
+         * Default value for socket timeout in milliseconds.
          * A timeout value of zero is interpreted as an infinite timeout.
          * A negative value is interpreted as undefined (system default if applicable).
          */
@@ -298,8 +291,6 @@ public class HttpClientProperties {
         private int maxConnectionsPerRoute = DEFAULT_MAX_CONNECTIONS_PER_ROUTE;
 
         private long timeToLive = DEFAULT_TIME_TO_LIVE;
-
-        private TimeUnit timeToLiveUnit = DEFAULT_TIME_TO_LIVE_UNIT;
 
         private boolean followRedirects = DEFAULT_FOLLOW_REDIRECTS;
 
@@ -332,16 +323,11 @@ public class HttpClientProperties {
             return timeToLive;
         }
 
+        /**
+         * @param timeToLive Defines the total span of time connections can be kept alive or execute requests in seconds.
+         */
         public void setTimeToLive(long timeToLive) {
             this.timeToLive = timeToLive;
-        }
-
-        public TimeUnit getTimeToLiveUnit() {
-            return timeToLiveUnit;
-        }
-
-        public void setTimeToLiveUnit(TimeUnit timeToLiveUnit) {
-            this.timeToLiveUnit = timeToLiveUnit;
         }
 
         public boolean isFollowRedirects() {

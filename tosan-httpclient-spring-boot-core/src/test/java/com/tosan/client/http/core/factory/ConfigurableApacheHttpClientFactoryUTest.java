@@ -11,7 +11,6 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
 import org.apache.hc.client5.http.routing.HttpRoutePlanner;
 import org.apache.hc.core5.http.protocol.BasicHttpContext;
-import org.apache.hc.core5.util.Timeout;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,27 +57,8 @@ public class ConfigurableApacheHttpClientFactoryUTest {
         HttpClientBuilder builder = underTest.createBuilder();
         RequestConfig requestConfig = (RequestConfig) ReflectionTestUtils.getField(builder, HttpClientBuilder.class, "defaultRequestConfig");
         assertThat(requestConfig).isNotNull();
-        assertThat(requestConfig.getConnectTimeout())
-                .isEqualTo(Timeout.ofMilliseconds(HttpClientProperties.ConnectionConfiguration.DEFAULT_CONNECTION_TIMEOUT));
-        assertThat(requestConfig.getConnectionRequestTimeout())
-                .isEqualTo(Timeout.ofMilliseconds(HttpClientProperties.ConnectionConfiguration.DEFAULT_SOCKET_TIMEOUT));
-
         HttpRoutePlanner proxySelector = (SystemDefaultRoutePlanner) ReflectionTestUtils.getField(builder, HttpClientBuilder.class, "routePlanner");
         assertThat(proxySelector).isNull();
-    }
-
-    @Test
-    public void createBuilder_timeoutConfiguration() {
-        connectionConfiguration.setConnectionTimeout(1234);
-        connectionConfiguration.setSocketTimeout(5678);
-        ConfigurableApacheHttpClientFactory underTest = new ConfigurableApacheHttpClientFactory(HttpClientBuilder.create(),
-                PoolingHttpClientConnectionManagerBuilder.create(), httpClientProperties);
-        HttpClientBuilder builder = underTest.createBuilder();
-
-        RequestConfig requestConfig = (RequestConfig) ReflectionTestUtils.getField(builder, HttpClientBuilder.class, "defaultRequestConfig");
-
-        assertThat(requestConfig.getConnectTimeout()).isEqualTo(Timeout.ofMilliseconds(1234));
-        assertThat(requestConfig.getConnectionRequestTimeout()).isEqualTo(Timeout.ofMilliseconds(5678));
     }
 
     @Test

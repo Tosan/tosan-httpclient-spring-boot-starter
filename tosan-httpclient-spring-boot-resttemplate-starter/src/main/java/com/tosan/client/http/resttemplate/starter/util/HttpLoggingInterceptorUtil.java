@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
@@ -26,7 +27,7 @@ import java.util.Map;
  * @since 8/3/2022
  */
 public class HttpLoggingInterceptorUtil {
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new Jackson2ObjectMapperBuilder().build();
 
     static {
         mapper.enable(SerializationFeature.INDENT_OUTPUT)
