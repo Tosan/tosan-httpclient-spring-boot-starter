@@ -65,9 +65,10 @@ public class HttpLoggingInterceptorUtil {
         return toJson(requestData);
     }
 
-    public String getResponseDetailContent(ClientHttpResponse response, String webServiceName) throws IOException {
+    public String getResponseDetailContent(ClientHttpResponse response, String webServiceName, long elapsedTime) throws IOException {
         final Map<String, Object> responseData = new LinkedHashMap<>();
         responseData.put("invoked", webServiceName);
+        responseData.put("duration", elapsedTime / 1000.0 + "s");
         responseData.put("status", response.getStatusCode());
         if (!response.getHeaders().isEmpty()) {
             responseData.put("headers", getMaskedHeaders(response.getHeaders()));
@@ -80,9 +81,10 @@ public class HttpLoggingInterceptorUtil {
         return toJson(responseData);
     }
 
-    public String getExceptionDetailContent(Exception exception, String webServiceName) {
+    public String getExceptionDetailContent(Exception exception, String webServiceName, long elapsedTime) {
         final Map<String, Object> exceptionData = new LinkedHashMap<>();
         exceptionData.put("invoked", webServiceName);
+        exceptionData.put("duration", elapsedTime / 1000.0 + "s");
         exceptionData.put("exception", exception.getClass().getSimpleName());
         exceptionData.put("message", exception.getMessage());
         return toJson(exceptionData);
