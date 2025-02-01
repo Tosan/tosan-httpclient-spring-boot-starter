@@ -58,7 +58,7 @@ public class HttpLoggingInterceptorUtil {
         }
         if (body != null) {
             String maskedBody;
-            if (Objects.requireNonNull(request.getHeaders().getContentType())
+            if (request.getHeaders().getContentType() != null && request.getHeaders().getContentType()
                     .equalsTypeAndSubtype(MediaType.APPLICATION_FORM_URLENCODED)) {
                 maskedBody = getUrlEncodedString(new String(body, StandardCharsets.UTF_8));
             } else {
