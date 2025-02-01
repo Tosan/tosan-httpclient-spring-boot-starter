@@ -11,16 +11,14 @@ import com.tosan.tools.mask.starter.replace.JsonReplaceHelperDecider;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ali Alimohammadi
@@ -50,7 +48,7 @@ public class HttpLoggingInterceptorUtil {
         boolean hasQueryString = urlString.contains("?");
         if (hasQueryString) {
             String[] splitUrl = urlString.split("[?]");
-            String maskedQueryString = splitUrl.length > 1 ? getMaskedQueryString(splitUrl[1]) : "";
+            String maskedQueryString = splitUrl.length > 1 ? getUrlEncodedString(splitUrl[1]) : "";
             requestData.put("service", request.getMethod() + " " + splitUrl[0] + "?" + maskedQueryString);
         } else {
             requestData.put("service", request.getMethod() + " " + urlString);
@@ -59,7 +57,13 @@ public class HttpLoggingInterceptorUtil {
             requestData.put("headers", getMaskedHeaders(request.getHeaders()));
         }
         if (body != null) {
-            String maskedBody = replaceHelperDecider.replace(new String(body, StandardCharsets.UTF_8));
+            String maskedBody;
+            if (request.getHeaders().getContentType() != null && request.getHeaders().getContentType()
+                    .equalsTypeAndSubtype(MediaType.APPLICATION_FORM_URLENCODED)) {
+                maskedBody = getUrlEncodedString(new String(body, StandardCharsets.UTF_8));
+            } else {
+                maskedBody = replaceHelperDecider.replace(new String(body, StandardCharsets.UTF_8));
+            }
             requestData.put("body", new RawValue(maskedBody));
         }
         return toJson(requestData);
@@ -111,7 +115,7 @@ public class HttpLoggingInterceptorUtil {
         return securedHeaders;
     }
 
-    private String getMaskedQueryString(String queryString) {
+    private String getUrlEncodedString(String queryString) {
         if (StringUtils.isEmpty(queryString)) {
             return queryString;
         }
