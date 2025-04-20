@@ -22,6 +22,8 @@ import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
 import feign.hc5.ApacheHttp5Client;
+import feign.micrometer.MicrometerObservationCapability;
+import io.micrometer.observation.ObservationRegistry;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -198,6 +200,10 @@ public abstract class AbstractFeignConfiguration {
                 .isFollowRedirects());
     }
 
+    public MicrometerObservationCapability capability(ObservationRegistry observationRegistry) {
+        return new MicrometerObservationCapability(observationRegistry);
+    }
+
     public Feign.Builder feignBuilder(Client feignClient,
                                       Request.Options options,
                                       List<RequestInterceptor> requestInterceptors,
@@ -207,7 +213,8 @@ public abstract class AbstractFeignConfiguration {
                                       Retryer retryer,
                                       Logger.Level logLevel,
                                       CustomErrorDecoder customErrorDecoder,
-                                      Logger logger) {
+                                      Logger logger,
+                                      Capability capability) {
         return Feign.builder().client(feignClient)
                 .options(options)
                 .encoder(feignEncoder)
@@ -217,7 +224,8 @@ public abstract class AbstractFeignConfiguration {
                 .requestInterceptors(requestInterceptors)
                 .retryer(retryer)
                 .logger(logger)
-                .logLevel(logLevel);
+                .logLevel(logLevel)
+                .addCapability(capability);
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
