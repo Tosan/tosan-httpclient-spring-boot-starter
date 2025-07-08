@@ -9,6 +9,8 @@
     </parent>
 
     <artifactId>tosan-httpclient-spring-boot-core</artifactId>
+    <name>tosan-httpclient-spring-boot-core</name>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
