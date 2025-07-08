@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tosan.client.http</groupId>
     <artifactId>tosan-httpclient-spring-boot-root</artifactId>
-    <version>3.5.2-SNAPSHOT</version>
+    <version>3.5.2</version>
     <packaging>pom</packaging>
 
     <parent>
@@ -47,7 +47,7 @@
         <connection>scm:git:https://github.com/Tosan/tosan-httpclient-spring-boot-starter.git</connection>
         <developerConnection>scm:git:https://github.com/Tosan/tosan-httpclient-spring-boot-starter.git</developerConnection>
         <url>https://github.com/Tosan/tosan-httpclient-spring-boot-starter</url>
-        <tag>HEAD</tag>
+        <tag>v3.5.2</tag>
     </scm>
 
     <properties>
