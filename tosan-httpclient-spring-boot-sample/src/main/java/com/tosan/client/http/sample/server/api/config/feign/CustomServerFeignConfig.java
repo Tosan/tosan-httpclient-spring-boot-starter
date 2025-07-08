@@ -18,6 +18,7 @@ import com.tosan.tools.mask.starter.replace.RegexReplaceHelper;
 import feign.*;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
+import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -211,6 +212,12 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
     }
 
     @Override
+    @Bean("customServer-feignCapabilities")
+    public List<Capability> feignCapabilities(ObservationRegistry observationRegistry) {
+        return super.feignCapabilities(observationRegistry);
+    }
+
+    @Override
     @Bean("customServer-feignBuilder")
     public Feign.Builder feignBuilder(@Qualifier("customServer-feignClient") Client feignClient,
                                       @Qualifier("customServer-feignOption") Request.Options options,
@@ -221,9 +228,10 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
                                       @Qualifier("customServer-retryer") Retryer retryer,
                                       @Qualifier("customServer-feignLoggerLevel") Logger.Level logLevel,
                                       @Qualifier("customServer-feignErrorDecoder") CustomErrorDecoder customErrorDecoder,
-                                      @Qualifier("customServer-httpFeignClientLogger") Logger logger) {
+                                      @Qualifier("customServer-httpFeignClientLogger") Logger logger,
+                                      @Qualifier("customServer-feignCapabilities") List<Capability> feignCapabilities) {
         return super.feignBuilder(feignClient, options, requestInterceptors, feignContract, feignDecoder, feignEncoder,
-                retryer, logLevel, customErrorDecoder, logger);
+                retryer, logLevel, customErrorDecoder, logger, feignCapabilities);
     }
 
     @Bean

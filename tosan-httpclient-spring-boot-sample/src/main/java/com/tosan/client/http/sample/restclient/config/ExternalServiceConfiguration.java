@@ -1,12 +1,13 @@
 package com.tosan.client.http.sample.restclient.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tosan.client.http.core.factory.ConfigurableApacheHttpClientFactory;
-import com.tosan.client.http.sample.restclient.exception.ExceptionHandler;
 import com.tosan.client.http.core.HttpClientProperties;
+import com.tosan.client.http.core.factory.ConfigurableApacheHttpClientFactory;
 import com.tosan.client.http.resttemplate.starter.configuration.AbstractHttpClientConfiguration;
 import com.tosan.client.http.resttemplate.starter.impl.ExternalServiceInvoker;
 import com.tosan.client.http.resttemplate.starter.util.HttpLoggingInterceptorUtil;
+import com.tosan.client.http.sample.restclient.exception.ExceptionHandler;
+import io.micrometer.observation.ObservationRegistry;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -115,8 +116,9 @@ public class ExternalServiceConfiguration extends AbstractHttpClientConfiguratio
 
     @Bean("external-restTemplate")
     @Override
-    public RestTemplate restTemplate(@Qualifier("external-restTemplateBuilder") RestTemplateBuilder builder) {
-        return super.restTemplate(builder);
+    public RestTemplate restTemplate(@Qualifier("external-restTemplateBuilder") RestTemplateBuilder builder,
+                                     ObservationRegistry observationRegistry) {
+        return super.restTemplate(builder, observationRegistry);
     }
 
     @Bean("external-serviceInvoker")

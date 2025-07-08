@@ -9,6 +9,7 @@ import com.tosan.client.http.core.factory.ConfigurableApacheHttpClientFactory;
 import com.tosan.client.http.resttemplate.starter.impl.ExternalServiceInvoker;
 import com.tosan.client.http.resttemplate.starter.impl.interceptor.HttpLoggingInterceptor;
 import com.tosan.client.http.resttemplate.starter.util.HttpLoggingInterceptorUtil;
+import io.micrometer.observation.ObservationRegistry;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -71,18 +72,6 @@ public abstract class AbstractHttpClientConfiguration {
         return converter;
     }
 
-    public RestTemplateBuilder restTemplateBuilder(
-            HttpMessageConverter<Object> httpMessageConverter,
-            ClientHttpRequestFactory clientHttpRequestFactory,
-            List<ClientHttpRequestInterceptor> clientHttpRequestInterceptors,
-            ResponseErrorHandler responseErrorHandler) {
-        return new RestTemplateBuilder()
-                .messageConverters(httpMessageConverter)
-                .requestFactory(() -> clientHttpRequestFactory)
-                .additionalInterceptors(clientHttpRequestInterceptors)
-                .errorHandler(responseErrorHandler);
-    }
-
     public ClientHttpRequestInterceptor httpLoggingRequestInterceptor(HttpLoggingInterceptorUtil httpLoggingInterceptorUtil) {
         return new HttpLoggingInterceptor(httpLoggingInterceptorUtil, getExternalServiceName());
     }
@@ -103,8 +92,22 @@ public abstract class AbstractHttpClientConfiguration {
 
     public abstract ResponseErrorHandler responseErrorHandler();
 
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder.build();
+    public RestTemplateBuilder restTemplateBuilder(
+            HttpMessageConverter<Object> httpMessageConverter,
+            ClientHttpRequestFactory clientHttpRequestFactory,
+            List<ClientHttpRequestInterceptor> clientHttpRequestInterceptors,
+            ResponseErrorHandler responseErrorHandler) {
+        return new RestTemplateBuilder()
+                .messageConverters(httpMessageConverter)
+                .requestFactory(() -> clientHttpRequestFactory)
+                .additionalInterceptors(clientHttpRequestInterceptors)
+                .errorHandler(responseErrorHandler);
+    }
+
+    public RestTemplate restTemplate(RestTemplateBuilder builder, ObservationRegistry observationRegistry) {
+        RestTemplate restTemplate = builder.build();
+        restTemplate.setObservationRegistry(observationRegistry);
+        return restTemplate;
     }
 
     public ExternalServiceInvoker serviceInvoker(RestTemplate restTemplate, HttpClientProperties httpClientProperties) {

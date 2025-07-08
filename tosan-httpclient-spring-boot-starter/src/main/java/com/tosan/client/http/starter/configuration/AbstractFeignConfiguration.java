@@ -22,6 +22,8 @@ import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
 import feign.hc5.ApacheHttp5Client;
+import feign.micrometer.MicrometerObservationCapability;
+import io.micrometer.observation.ObservationRegistry;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -45,9 +47,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.tosan.client.http.core.Constants.*;
@@ -198,6 +198,10 @@ public abstract class AbstractFeignConfiguration {
                 .isFollowRedirects());
     }
 
+    public List<Capability> feignCapabilities(ObservationRegistry observationRegistry) {
+        return List.of(new MicrometerObservationCapability(observationRegistry));
+    }
+
     public Feign.Builder feignBuilder(Client feignClient,
                                       Request.Options options,
                                       List<RequestInterceptor> requestInterceptors,
@@ -207,8 +211,9 @@ public abstract class AbstractFeignConfiguration {
                                       Retryer retryer,
                                       Logger.Level logLevel,
                                       CustomErrorDecoder customErrorDecoder,
-                                      Logger logger) {
-        return Feign.builder().client(feignClient)
+                                      Logger logger,
+                                      List<Capability> feignCapabilities) {
+        Feign.Builder feignBuilder = Feign.builder().client(feignClient)
                 .options(options)
                 .encoder(feignEncoder)
                 .decoder(feignDecoder)
@@ -218,6 +223,11 @@ public abstract class AbstractFeignConfiguration {
                 .retryer(retryer)
                 .logger(logger)
                 .logLevel(logLevel);
+        Optional.ofNullable(feignCapabilities)
+                .stream()
+                .flatMap(Collection::stream)
+                .forEach(feignBuilder::addCapability);
+        return feignBuilder;
     }
 
     protected final <T> T getFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
@@ -225,19 +235,8 @@ public abstract class AbstractFeignConfiguration {
         return createFeignController(baseServiceUrl, controllerPath, feignBuilder, classType);
     }
 
-    protected final <T> T getFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
-                                             Class<T> classType, Logger logger) {
-        return createFeignController(baseServiceUrl, controllerPath, feignBuilder, classType, logger);
-    }
-
-    protected final <T> T getFeignController(String baseServiceUrl, Feign.Builder feignBuilder,
-                                             Class<T> classType) {
+    protected final <T> T getFeignController(String baseServiceUrl, Feign.Builder feignBuilder, Class<T> classType) {
         return createFeignController(baseServiceUrl, null, feignBuilder, classType);
-    }
-
-    protected final <T> T getFeignController(String baseServiceUrl, Feign.Builder feignBuilder,
-                                             Class<T> classType, Logger logger) {
-        return createFeignController(baseServiceUrl, null, feignBuilder, classType, logger);
     }
 
     private <T> T createFeignController(String baseServiceUrl, String controllerPath, Feign.Builder feignBuilder,
