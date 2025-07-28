@@ -60,6 +60,8 @@ import static com.tosan.tools.mask.starter.configuration.MaskBeanConfiguration.S
 public abstract class AbstractFeignConfiguration {
     protected ObjectFactory<HttpMessageConverters> messageConverters;
 
+    public abstract String getExternalServiceName();
+
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper
@@ -82,8 +84,8 @@ public abstract class AbstractFeignConfiguration {
         return new SecureParametersConfig(securedParameters);
     }
 
-    public Logger httpFeignClientLogger(JsonReplaceHelperDecider replaceHelperDecider, String serverName) {
-        return new HttpFeignClientLogger(serverName, replaceHelperDecider);
+    public Logger httpFeignClientLogger(JsonReplaceHelperDecider replaceHelperDecider) {
+        return new HttpFeignClientLogger(getExternalServiceName(), replaceHelperDecider);
     }
 
     public ConfigurableApacheHttpClientFactory apacheHttpClientFactory(
@@ -188,7 +190,6 @@ public abstract class AbstractFeignConfiguration {
         return Logger.Level.FULL;
     }
 
-
     public Request.Options options(HttpClientProperties customServerClientConfig) {
         HttpClientProperties.ConnectionConfiguration connectionConfiguration = customServerClientConfig
                 .getConnection();
@@ -199,7 +200,8 @@ public abstract class AbstractFeignConfiguration {
     }
 
     public List<Capability> feignCapabilities(ObservationRegistry observationRegistry) {
-        return List.of(new MicrometerObservationCapability(observationRegistry));
+        return List.of(new MicrometerObservationCapability(observationRegistry,
+                new TosanFeignObservationConvention().externalName(getExternalServiceName())));
     }
 
     public Feign.Builder feignBuilder(Client feignClient,

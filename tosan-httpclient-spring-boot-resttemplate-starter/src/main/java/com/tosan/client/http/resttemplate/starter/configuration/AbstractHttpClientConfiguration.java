@@ -107,6 +107,7 @@ public abstract class AbstractHttpClientConfiguration {
     public RestTemplate restTemplate(RestTemplateBuilder builder, ObservationRegistry observationRegistry) {
         RestTemplate restTemplate = builder.build();
         restTemplate.setObservationRegistry(observationRegistry);
+        restTemplate.setObservationConvention(new TosanHttpClientObservationConvention().externalName(getExternalServiceName()));
         return restTemplate;
     }
 

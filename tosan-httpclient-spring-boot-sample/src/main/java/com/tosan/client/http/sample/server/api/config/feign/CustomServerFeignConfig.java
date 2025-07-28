@@ -49,11 +49,17 @@ import java.util.List;
 public class CustomServerFeignConfig extends AbstractFeignConfiguration {
 
     @Override
+    public String getExternalServiceName() {
+        return "customServer-service";
+    }
+
+    @Override
     @Bean("customServer-objectMapper")
     public ObjectMapper objectMapper() {
         return super.objectMapper();
     }
 
+    @Override
     @Bean("customServer-replace-helper")
     public JsonReplaceHelperDecider replaceHelperDecider(
             JacksonReplaceHelper jacksonReplaceHelper, RegexReplaceHelper regexReplaceHelper,
@@ -61,12 +67,14 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
         return super.replaceHelperDecider(jacksonReplaceHelper, regexReplaceHelper, secureParametersConfig);
     }
 
+    @Override
     @Bean("customServer-httpFeignClientLogger")
     public Logger httpFeignClientLogger(
             @Qualifier("customServer-replace-helper") JsonReplaceHelperDecider replaceHelperDecider) {
-        return super.httpFeignClientLogger(replaceHelperDecider, "custom-server");
+        return super.httpFeignClientLogger(replaceHelperDecider);
     }
 
+    @Override
     @Bean("customServer-secured-parameters")
     @ConditionalOnMissingBean(name = "customServer-secured-parameters")
     public SecureParametersConfig secureParametersConfig() {
@@ -166,7 +174,7 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration {
 
     @Override
     @Bean("customServer-feignErrorDecoderConfig")
-    public CustomErrorDecoderConfig customErrorDecoderConfig(
+    public CustomErrorDecoderConfig     customErrorDecoderConfig(
             @Qualifier("customServer-objectMapper") ObjectMapper objectMapper) {
         CustomErrorDecoderConfig customErrorDecoderConfig = new CustomErrorDecoderConfig();
         customErrorDecoderConfig.getScanPackageList().add("com.tosan.client.http.sample.server.api.exception");
