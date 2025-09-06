@@ -130,8 +130,12 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
                         "packageList and checkedExceptionClass and uncheckedExceptionClass be filled when " +
                                 "extractType is EXCEPTION_IDENTIFIER_FIELDS or FULL_NAME_REFLECTION");
             }
-            extractAndFillMap(checkedExceptionClass);
-            extractAndFillMap(uncheckedExceptionClass);
+            if (!Modifier.isAbstract(checkedExceptionClass.getModifiers())) {
+                extractAndFillMap(checkedExceptionClass);
+            }
+            if (!Modifier.isAbstract(uncheckedExceptionClass.getModifiers())) {
+                extractAndFillMap(uncheckedExceptionClass);
+            }
             Reflections reflections = new Reflections(scanPackageList.toArray());
             reflections.getSubTypesOf(checkedExceptionClass)
                     .stream().filter(clazz -> !Modifier.isAbstract(clazz.getModifiers())).forEach(this::extractAndFillMap);
