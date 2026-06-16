@@ -1,6 +1,6 @@
 package com.tosan.client.http.sample.restclient.exception;
 
-import com.tosan.client.http.resttemplate.starter.impl.interceptor.AbstractErrorHandler;
+import com.tosan.client.http.restclient.starter.impl.interceptor.AbstractErrorHandler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.HttpClientErrorException;

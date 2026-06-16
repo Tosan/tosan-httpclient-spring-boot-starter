@@ -1,4 +1,5 @@
-custom-service:
+custom-web-service1:
+  client:
     authorization:
       enable: true
       username: user
@@ -8,16 +9,15 @@ custom-service:
       connection-timeout: 5000
       socket-timeout: 5000
 
-custom-web-service:
+custom-web-service2:
   client:
     authorization:
       enable: true
       username: user
       password: changeit
-    base-service-url: http://localhost:8084/custom-server
+    base-service-url: http://localhost:8084
     connection:
       connection-timeout: 5000
       socket-timeout: 5000
-
 server:
   port: 8084

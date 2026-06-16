@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 /**
  * @author Ali Alimohammadi
  * @since 4/18/2021
@@ -31,7 +33,8 @@ public class CustomServerRestControllerImpl implements CustomServerRestControlle
 
     @Override
     @ResponseStatus(HttpStatus.OK)
-    public GetInfoResponseDto getInfo(GetInfoRequestDto request, HttpHeaders headers) throws InvalidParameterException, RequiredParameterException {
+    public GetInfoResponseDto getInfo(GetInfoRequestDto request, Map<String, String> headers)
+            throws InvalidParameterException, RequiredParameterException {
         if (request.getSsn() != null) {
             if (request.getSsn().isEmpty()) {
                 RequiredParameterException requiredParameterException = new RequiredParameterException("ssn is empty");

@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
+import java.util.Map;
+
 /**
  * @author Ali Alimohammadi
  * @since 4/18/2021
@@ -32,6 +34,6 @@ public interface CustomServerRestController {
     @PostMapping(value = "/info",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    GetInfoResponseDto getInfo(
-            @RequestBody GetInfoRequestDto request, @RequestHeader HttpHeaders headers) throws InvalidParameterException, RequiredParameterException;
+    GetInfoResponseDto getInfo(@RequestBody GetInfoRequestDto request, @RequestHeader Map<String, String> headers)
+            throws InvalidParameterException, RequiredParameterException;
 }

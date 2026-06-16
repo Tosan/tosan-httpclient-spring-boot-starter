@@ -1,12 +1,18 @@
-package com.tosan.client.http.sample.restclient.config;
+package com.tosan.client.http.sample.feignclient.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.observation.ObservationRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestClient;
+import org.springframework.core.annotation.Order;
+
+/**
+ * @author Ali Alimohammadi
+ * @since 12/28/2020
+ */
 
 @Configuration
+@Order(1)
 public class AppConfig {
 
     @Bean
@@ -17,10 +23,5 @@ public class AppConfig {
     @Bean
     public ObservationRegistry observationRegistry() {
         return ObservationRegistry.create();
-    }
-
-    @Bean
-    public RestClient.Builder restClientBuilder() {
-        return RestClient.builder();
     }
 }
