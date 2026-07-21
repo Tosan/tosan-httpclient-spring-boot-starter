@@ -18,9 +18,4 @@ public class AppConfig {
     public ObservationRegistry observationRegistry() {
         return ObservationRegistry.create();
     }
-
-    @Bean
-    public RestClient.Builder restClientBuilder() {
-        return RestClient.builder();
-    }
 }

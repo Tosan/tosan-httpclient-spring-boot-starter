@@ -157,13 +157,13 @@ public abstract class AbstractRestClientConfiguration<P extends HttpClientProper
         );
     }
 
-    public final ExternalServiceInvoker createServiceInvoker(Environment environment) {
+    protected ExternalServiceInvoker createServiceInvoker(Environment environment) {
         P properties = loadHttpClientProperties(environment);
         validateProperties(properties);
         return new ExternalServiceInvoker(createClientService(properties), properties);
     }
 
-    public final ExternalServiceInvoker createServiceInvoker(P properties) {
+    protected ExternalServiceInvoker createServiceInvoker(P properties) {
         validateProperties(properties);
         return new ExternalServiceInvoker(createClientService(properties), properties);
     }
