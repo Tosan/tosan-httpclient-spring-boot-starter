@@ -34,7 +34,6 @@ import java.util.List;
  */
 @Configuration
 @Slf4j
-@Import(FeignClientsConfiguration.class)
 public class CustomServerFeignConfig extends AbstractFeignConfiguration<HttpClientProperties> {
     public static final String SERVICE_NAME = "custom-web-service2";
 

@@ -29,6 +29,8 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.cloud.openfeign.FeignClientsConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -40,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.tosan.client.http.core.Constants.*;
 
+@Import(FeignClientsConfiguration.class)
 public abstract class AbstractFeignConfiguration<P extends HttpClientProperties> {
 
     private final String serviceName;
