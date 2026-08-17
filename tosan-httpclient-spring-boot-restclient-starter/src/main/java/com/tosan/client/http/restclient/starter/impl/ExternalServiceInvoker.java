@@ -2,7 +2,6 @@ package com.tosan.client.http.restclient.starter.impl;
 
 import com.tosan.client.http.core.HttpClientProperties;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 /**
@@ -20,6 +19,10 @@ public class ExternalServiceInvoker implements DisposableBean {
 
     public RestClient getClient() {
         return this.clientService.getRestClient();
+    }
+
+    public HttpClientProperties getHttpClientProperties() {
+        return this.httpClientProperties;
     }
 
     public String generateUrl(String path) {
