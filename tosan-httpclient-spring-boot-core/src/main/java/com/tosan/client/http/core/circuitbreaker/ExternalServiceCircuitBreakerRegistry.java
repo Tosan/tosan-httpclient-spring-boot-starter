@@ -16,6 +16,7 @@ public class ExternalServiceCircuitBreakerRegistry {
 
     static final String DEFAULT_PROPERTIES_PATH = "client";
     static final String CIRCUIT_BREAKER_PROPERTIES_SUFFIX = ".circuit-breaker";
+    static final String SHARED_CIRCUIT_BREAKER_PROPERTIES_PATH = "circuit-breaker";
 
     private final CircuitBreakerExceptionClassifier exceptionClassifier;
     private final Environment environment;
@@ -44,7 +45,7 @@ public class ExternalServiceCircuitBreakerRegistry {
 
     public void register(String serviceName, CircuitBreakerConfiguration configuration) {
         if (configuration == null) {
-            configuration = new CircuitBreakerConfiguration();
+            return;
         }
         configurationByService.put(serviceName, configuration);
         if (configuration.isEnabled()) {
@@ -56,13 +57,12 @@ public class ExternalServiceCircuitBreakerRegistry {
     public Optional<CircuitBreaker> resolve(String serviceName) {
         CircuitBreakerConfiguration configuration = configurationByService.get(serviceName);
         if (configuration == null) {
-            if (environment == null) {
-                return Optional.empty();
+            configuration = resolveConfiguration(serviceName);
+            if (configuration != null) {
+                configurationByService.put(serviceName, configuration);
             }
-            configuration = bindConfiguration(serviceName, environment);
-            configurationByService.put(serviceName, configuration);
         }
-        if (!configuration.isEnabled()) {
+        if (configuration == null || !configuration.isEnabled()) {
             return Optional.empty();
         }
         return Optional.of(circuitBreakerRegistry.circuitBreaker(serviceName, toResilienceConfig(configuration)));
@@ -71,7 +71,10 @@ public class ExternalServiceCircuitBreakerRegistry {
 
     public Optional<CircuitBreaker> resolve(String serviceName, Environment environment) {
         if (!configurationByService.containsKey(serviceName) && environment != null) {
-            configurationByService.put(serviceName, bindConfiguration(serviceName, environment));
+            CircuitBreakerConfiguration configuration = bindConfiguration(serviceName, environment);
+            if (configuration != null) {
+                configurationByService.put(serviceName, configuration);
+            }
         }
         return resolve(serviceName);
     }
@@ -80,7 +83,24 @@ public class ExternalServiceCircuitBreakerRegistry {
         String propertyPrefix = serviceName + "." + DEFAULT_PROPERTIES_PATH + CIRCUIT_BREAKER_PROPERTIES_SUFFIX;
         return Binder.get(environment)
                 .bind(propertyPrefix, Bindable.of(CircuitBreakerConfiguration.class))
-                .orElseGet(CircuitBreakerConfiguration::new);
+                .orElse(null);
+    }
+
+    public CircuitBreakerConfiguration bindSharedConfiguration(Environment environment) {
+        return Binder.get(environment)
+                .bind(SHARED_CIRCUIT_BREAKER_PROPERTIES_PATH, Bindable.of(CircuitBreakerConfiguration.class))
+                .orElse(null);
+    }
+
+    private CircuitBreakerConfiguration resolveConfiguration(String serviceName) {
+        if (environment == null) {
+            return null;
+        }
+        CircuitBreakerConfiguration perServiceConfiguration = bindConfiguration(serviceName, environment);
+        if (perServiceConfiguration != null) {
+            return perServiceConfiguration;
+        }
+        return bindSharedConfiguration(environment);
     }
 
     private CircuitBreakerConfig toResilienceConfig(CircuitBreakerConfiguration configuration) {

@@ -8,6 +8,12 @@ custom-web-service1:
     connection:
       connection-timeout: 5000
       socket-timeout: 5000
+    circuit-breaker:
+      enabled: true
+      failure-rate-threshold: 50
+      minimum-number-of-calls: 3
+      sliding-window-size: 5
+      wait-duration-in-open-state: 10s
 
 custom-web-service2:
   client:
@@ -19,5 +25,11 @@ custom-web-service2:
     connection:
       connection-timeout: 5000
       socket-timeout: 5000
+    circuit-breaker:
+      enabled: true
+      failure-rate-threshold: 50
+      minimum-number-of-calls: 1
+      sliding-window-size: 5
+      wait-duration-in-open-state: 60s
 server:
   port: 8084

@@ -1,5 +1,6 @@
 package com.tosan.client.http.starter.configuration;
 
+import com.tosan.client.http.core.circuitbreaker.CircuitBreakerConfiguration;
 import com.tosan.client.http.core.circuitbreaker.ExternalServiceCircuitBreakerRegistry;
 import com.tosan.client.http.starter.impl.feign.ExternalServiceInvoker;
 import org.springframework.beans.BeansException;
@@ -21,9 +22,11 @@ public class FeignCircuitBreakerRegistrar implements BeanPostProcessor {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof ExternalServiceInvoker<?>) {
-            circuitBreakerRegistry.register(
-                    beanName,
-                    circuitBreakerRegistry.bindConfiguration(beanName, environment));
+            CircuitBreakerConfiguration configuration =
+                    circuitBreakerRegistry.bindConfiguration(beanName, environment);
+            if (configuration != null) {
+                circuitBreakerRegistry.register(beanName, configuration);
+            }
         }
         return bean;
     }

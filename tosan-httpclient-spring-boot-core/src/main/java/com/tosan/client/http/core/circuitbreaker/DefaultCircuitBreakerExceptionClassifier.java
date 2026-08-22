@@ -14,12 +14,15 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class DefaultCircuitBreakerExceptionClassifier
         implements CircuitBreakerExceptionClassifier {
 
     private static final String FEIGN_EXCEPTION_NAME = "feign.FeignException";
+    private static final String INTERNAL_SERVER_EXCEPTION_NAME = "com.tosan.client.http.starter.impl.feign.exception.InternalServerException";
+    private static final String UNKNOWN_EXCEPTION_NAME = "com.tosan.client.http.starter.impl.feign.exception.UnknownException";
 
     @Override
     public boolean shouldRecordFailure(Throwable throwable) {
@@ -42,6 +45,9 @@ public class DefaultCircuitBreakerExceptionClassifier
                 || throwable instanceof CircuitBreakerBusinessException) {
             return true;
         }
+        if (throwable.getClass().getName().equals(UNKNOWN_EXCEPTION_NAME)) {
+            return true;
+        }
         if (throwable instanceof HttpClientErrorException exception) {
             return exception.getStatusCode().is4xxClientError();
         }
@@ -58,7 +64,28 @@ public class DefaultCircuitBreakerExceptionClassifier
                 || throwable instanceof UnknownHostException) {
             return true;
         }
+        if (isInternalServerError(throwable)) {
+            return true;
+        }
         return isFeignServerError(throwable);
+    }
+
+    private boolean isInternalServerError(Throwable throwable) {
+        String name = throwable.getClass().getName();
+        if (name.equals(INTERNAL_SERVER_EXCEPTION_NAME)) {
+            // InternalServerException from feign starter - check httpStatusCode
+            try {
+                var errorParam = throwable.getClass().getMethod("getErrorParam").invoke(throwable);
+                if (errorParam instanceof Map) {
+                    Object httpStatus = ((Map<?, ?>) errorParam).get("httpStatusCode");
+                    if (httpStatus instanceof Number && (Integer) httpStatus >= 500) {
+                        return true;
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return false;
     }
 
     private boolean isFeignClientError(Throwable throwable) {
