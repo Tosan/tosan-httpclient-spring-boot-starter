@@ -1,5 +1,6 @@
 package com.tosan.client.http.core;
 
+import com.tosan.client.http.core.circuitbreaker.CircuitBreakerConfiguration;
 import org.apache.hc.client5.http.cookie.StandardCookieSpec;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
@@ -20,6 +21,8 @@ public class HttpClientProperties {
     private ConnectionConfiguration connection = new ConnectionConfiguration();
     @NestedConfigurationProperty
     private AuthorizationConfiguration authorization = new AuthorizationConfiguration();
+    @NestedConfigurationProperty
+    private CircuitBreakerConfiguration circuitBreaker = new CircuitBreakerConfiguration();
 
     public String getBaseServiceUrl() {
         return baseServiceUrl;
@@ -59,6 +62,14 @@ public class HttpClientProperties {
 
     public void setAuthorization(AuthorizationConfiguration authorization) {
         this.authorization = authorization;
+    }
+
+    public CircuitBreakerConfiguration getCircuitBreaker() {
+        return circuitBreaker;
+    }
+
+    public void setCircuitBreaker(CircuitBreakerConfiguration circuitBreaker) {
+        this.circuitBreaker = circuitBreaker;
     }
 
     public static class ProxyConfiguration {

@@ -6,7 +6,6 @@ import com.tosan.client.http.sample.server.api.exception.RequiredParameterExcept
 import com.tosan.client.http.sample.server.api.model.Context;
 import com.tosan.client.http.sample.server.api.model.GetInfoRequestDto;
 import com.tosan.client.http.sample.server.api.model.GetInfoResponseDto;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -51,5 +50,10 @@ public class CustomServerRestControllerImpl implements CustomServerRestControlle
             invalidParameterException.addErrorParam("ssn", "notNull");
             throw invalidParameterException;
         }
+    }
+
+    @Override
+    public GetInfoResponseDto error() {
+        throw new RuntimeException("Simulated server error for circuit breaker test");
     }
 }

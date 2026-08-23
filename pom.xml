@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tosan.client.http</groupId>
     <artifactId>tosan-httpclient-spring-boot-root</artifactId>
@@ -10,7 +11,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>4.1.0</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <name>tosan-httpclient-spring-boot-starter</name>
@@ -45,7 +46,8 @@
 
     <scm>
         <connection>scm:git:https://github.com/Tosan/tosan-httpclient-spring-boot-starter.git</connection>
-        <developerConnection>scm:git:https://github.com/Tosan/tosan-httpclient-spring-boot-starter.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/Tosan/tosan-httpclient-spring-boot-starter.git
+        </developerConnection>
         <url>https://github.com/Tosan/tosan-httpclient-spring-boot-starter</url>
         <tag>HEAD</tag>
     </scm>
@@ -53,6 +55,7 @@
     <properties>
         <java.version>17</java.version>
         <spring-cloud.version>2025.1.2</spring-cloud.version>
+        <resilience4j.version>2.3.0</resilience4j.version>
         <tosan.mask.version>2.3.0</tosan.mask.version>
     </properties>
 
@@ -69,6 +72,13 @@
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
                 <version>0.10.2</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-bom</artifactId>
+                <version>${resilience4j.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.tosan.tools</groupId>
