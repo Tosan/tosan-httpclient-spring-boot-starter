@@ -1,5 +1,6 @@
 package com.tosan.client.http.starter.impl.feign.exception;
 
+import com.tosan.client.http.core.exception.InfrastructureFailureException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Map;
@@ -8,7 +9,7 @@ import java.util.Map;
  * @author Ali Alimohammadi
  * @since 1/22/2021
  */
-public class InternalServerException extends RuntimeException {
+public class InternalServerException extends InfrastructureFailureException {
     private String errorType;
     private String errorCode;
     private String message;

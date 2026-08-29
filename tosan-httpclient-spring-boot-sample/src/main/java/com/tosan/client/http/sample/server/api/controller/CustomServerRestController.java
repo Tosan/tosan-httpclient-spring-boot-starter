@@ -36,4 +36,9 @@ public interface CustomServerRestController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     GetInfoResponseDto getInfo(@RequestBody GetInfoRequestDto request, @RequestHeader Map<String, String> headers)
             throws InvalidParameterException, RequiredParameterException;
+
+    @GetMapping(value = "/error",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    GetInfoResponseDto error();
 }
