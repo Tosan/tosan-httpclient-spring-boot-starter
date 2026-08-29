@@ -20,7 +20,7 @@ public class CircuitBreakerRestClientService {
 
     private final ExternalServiceInvoker externalInvoker;
 
-    @CircuitBreaker
+    @CircuitBreaker(provider = "info")
     public ResponseEntity<GetInfoResponseDto> callGetInfo(GetInfoRequestDto request) {
         log.info("Calling /custom-server/info with ssn=[{}]", request.getSsn());
         return externalInvoker
@@ -33,7 +33,7 @@ public class CircuitBreakerRestClientService {
                 .toEntity(GetInfoResponseDto.class);
     }
 
-    @CircuitBreaker
+    @CircuitBreaker()
     public ResponseEntity<GetInfoResponseDto> callErrorEndpoint() {
         log.info("Calling /custom-server/error (always returns 500)");
         return externalInvoker

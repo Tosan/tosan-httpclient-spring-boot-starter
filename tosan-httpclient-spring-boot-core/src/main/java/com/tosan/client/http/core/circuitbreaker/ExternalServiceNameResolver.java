@@ -9,16 +9,24 @@ import java.lang.reflect.Modifier;
 final class ExternalServiceNameResolver {
 
     static final String SERVICE_NAME_FIELD = "SERVICE_NAME";
+    private static final String NAME_SEPARATOR = ":";
 
     private ExternalServiceNameResolver() {
     }
 
-    static String resolve(Class<?> targetClass, CircuitBreaker annotation) {
+    static CircuitBreakerNames resolve(Class<?> targetClass, CircuitBreaker annotation) {
+        String providerName = resolveProviderName(targetClass);
+        String circuitBreakerName = providerName;
         if (annotation != null && StringUtils.hasText(annotation.provider())) {
-            return annotation.provider();
+            circuitBreakerName = providerName + NAME_SEPARATOR + annotation.provider();
         }
+        return new CircuitBreakerNames(providerName, circuitBreakerName);
+    }
+
+    private static String resolveProviderName(Class<?> targetClass) {
         ExternalServiceProvider providerAnnotation = targetClass.getAnnotation(ExternalServiceProvider.class);
-        if (providerAnnotation != null && StringUtils.hasText(providerAnnotation.value())) {
+        if (providerAnnotation != null
+                && StringUtils.hasText(providerAnnotation.value())) {
             return providerAnnotation.value();
         }
         String serviceName = readStaticServiceNameField(targetClass);
@@ -34,7 +42,8 @@ final class ExternalServiceNameResolver {
         while (currentClass != null && currentClass != Object.class) {
             try {
                 Field field = currentClass.getDeclaredField(SERVICE_NAME_FIELD);
-                if (Modifier.isStatic(field.getModifiers()) && field.getType() == String.class) {
+                if (Modifier.isStatic(field.getModifiers())
+                        && field.getType() == String.class) {
                     field.setAccessible(true);
                     return (String) field.get(null);
                 }
@@ -44,8 +53,12 @@ final class ExternalServiceNameResolver {
                 throw new ExternalServiceCircuitBreakerException(
                         "Unable to read SERVICE_NAME from " + currentClass.getName(), ex);
             }
+
             currentClass = currentClass.getSuperclass();
         }
         return null;
+    }
+
+    record CircuitBreakerNames(String providerName, String circuitBreakerName) {
     }
 }
