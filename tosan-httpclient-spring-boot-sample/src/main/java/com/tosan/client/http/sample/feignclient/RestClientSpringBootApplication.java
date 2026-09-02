@@ -1,12 +1,13 @@
 package com.tosan.client.http.sample.feignclient;
 
+import com.tosan.client.http.core.HttpClientProperties;
+import com.tosan.client.http.core.service.ExternalService;
 import com.tosan.client.http.sample.server.api.controller.CustomServerRestController;
 import com.tosan.client.http.sample.server.api.exception.InvalidParameterException;
 import com.tosan.client.http.sample.server.api.exception.RequiredParameterException;
 import com.tosan.client.http.sample.server.api.model.Context;
 import com.tosan.client.http.sample.server.api.model.GetInfoRequestDto;
 import com.tosan.client.http.sample.server.api.model.GetInfoResponseDto;
-import com.tosan.client.http.starter.impl.feign.ExternalServiceInvoker;
 import com.tosan.client.http.starter.impl.feign.exception.FeignClientRequestExecuteException;
 import com.tosan.client.http.starter.impl.feign.exception.InternalServerException;
 import com.tosan.client.http.starter.impl.feign.exception.UnknownException;
@@ -30,7 +31,8 @@ import java.util.Map;
 public class RestClientSpringBootApplication implements CommandLineRunner {
 
     @Autowired
-    private ExternalServiceInvoker<CustomServerRestController> externalInvoker;
+    private ExternalService<
+            CustomServerRestController, HttpClientProperties> externalService;
 
     @Autowired
     private CircuitBreakerFeignClientService circuitBreakerFeignClientService;
@@ -61,7 +63,7 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
         request.setSsn("123456789");
         GetInfoResponseDto response;
         try {
-            response = externalInvoker.getClient().getInfo(request, httpHeaders);
+            response = externalService.getClient().getInfo(request, httpHeaders);
             log.info("FeignClient Info: {}", response.toString());
         } catch (InvalidParameterException e) {
             log.error("FeignClient Info exception:{}", e.toString());
@@ -80,7 +82,7 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
             context.setUsername("ali");
             context.setPassword("ali110");
 
-            response = externalInvoker.getClient().login(context);
+            response = externalService.getClient().login(context);
             log.info("FeignClient Info: {}", response.toString());
         } catch (UnknownException e) {
             log.error("FeignClient Unknown exception with status Code 4xx:{}", e.toString());
@@ -92,7 +94,7 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
 
         request.setSsn(null);
         try {
-            response = externalInvoker.getClient().getInfo(request, httpHeaders);
+            response = externalService.getClient().getInfo(request, httpHeaders);
             log.info("FeignClient Info: {}", response.toString());
         } catch (InvalidParameterException e) {
             log.error("FeignClient Info exception:{}", e.toString());
@@ -108,7 +110,7 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
 
         request.setSsn("");
         try {
-            response = externalInvoker.getClient().getInfo(request, httpHeaders);
+            response = externalService.getClient().getInfo(request, httpHeaders);
             log.info("FeignClient Info: {}", response.toString());
         } catch (InvalidParameterException e) {
             log.error("FeignClient Info exception:{}", e.toString());
@@ -124,7 +126,7 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
 
         request.setSsn("a1233");
         try {
-            response = externalInvoker.getClient().getInfo(request, httpHeaders);
+            response = externalService.getClient().getInfo(request, httpHeaders);
             log.info("FeignClient Info: {}", response.toString());
         } catch (InvalidParameterException e) {
             log.error("FeignClient Info exception:{}", e.toString());

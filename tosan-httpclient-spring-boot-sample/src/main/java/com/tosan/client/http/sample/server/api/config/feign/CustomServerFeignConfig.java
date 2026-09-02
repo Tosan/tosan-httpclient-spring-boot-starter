@@ -3,26 +3,25 @@ package com.tosan.client.http.sample.server.api.config.feign;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tosan.client.http.core.HttpClientProperties;
+import com.tosan.client.http.core.service.ExternalService;
 import com.tosan.client.http.sample.server.api.controller.CustomServerRestController;
 import com.tosan.client.http.sample.server.api.exception.CustomServerException;
 import com.tosan.client.http.sample.server.api.model.Context;
 import com.tosan.client.http.starter.configuration.AbstractFeignConfiguration;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
 import com.tosan.client.http.starter.impl.feign.ExceptionExtractType;
-import com.tosan.client.http.starter.impl.feign.ExternalServiceInvoker;
 import com.tosan.client.http.starter.impl.feign.exception.TosanWebServiceRuntimeException;
 import com.tosan.tools.mask.starter.replace.JsonReplaceHelperDecider;
-import feign.*;
+import feign.Contract;
+import feign.Feign;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.cloud.openfeign.FeignClientsConfiguration;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.format.support.FormattingConversionService;
 
@@ -49,8 +48,12 @@ public class CustomServerFeignConfig extends AbstractFeignConfiguration<HttpClie
     }
 
     @Bean(SERVICE_NAME)
-    public ExternalServiceInvoker<CustomServerRestController> serviceInvokerBean(Environment environment) {
-        return createServiceInvoker(environment, CustomServerRestController.PATH, CustomServerRestController.class);
+    public ExternalService<CustomServerRestController, HttpClientProperties> serviceInvokerBean(Environment environment) {
+        return createServiceInvoker(
+                environment,
+                CustomServerRestController.PATH,
+                CustomServerRestController.class
+        );
     }
 
     @Override

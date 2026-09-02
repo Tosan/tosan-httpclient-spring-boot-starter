@@ -1,6 +1,7 @@
 package com.tosan.client.http.restclient.starter.impl;
 
 import com.tosan.client.http.core.HttpClientProperties;
+import com.tosan.client.http.core.service.ExternalService;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.web.client.RestClient;
 
@@ -8,21 +9,31 @@ import org.springframework.web.client.RestClient;
  * @author Ali Alimohammadi
  * @since 8/6/2022
  */
-public class ExternalServiceInvoker implements DisposableBean {
-    private final HttpClientProperties httpClientProperties;
+public class ExternalServiceInvoker<P extends HttpClientProperties>
+        implements ExternalService<RestClient, P>, DisposableBean {
+
+    private final String serviceName;
+    private final P httpClientProperties;
     private final ClientService clientService;
 
-    public ExternalServiceInvoker(ClientService clientService, HttpClientProperties httpClientProperties) {
+    public ExternalServiceInvoker(String serviceName, ClientService clientService, P httpClientProperties) {
+        this.serviceName = serviceName;
         this.clientService = clientService;
         this.httpClientProperties = httpClientProperties;
     }
 
-    public RestClient getClient() {
-        return this.clientService.getRestClient();
+    @Override
+    public P getProperties() {
+        return this.httpClientProperties;
     }
 
-    public HttpClientProperties getHttpClientProperties() {
-        return this.httpClientProperties;
+    @Override
+    public String getServiceName() {
+        return this.serviceName;
+    }
+
+    public RestClient getClient() {
+        return this.clientService.getRestClient();
     }
 
     public String generateUrl(String path) {

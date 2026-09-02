@@ -1,12 +1,13 @@
 package com.tosan.client.http.sample.feignclient;
 
+import com.tosan.client.http.core.HttpClientProperties;
 import com.tosan.client.http.core.circuitbreaker.CircuitBreaker;
+import com.tosan.client.http.core.service.ExternalService;
 import com.tosan.client.http.sample.server.api.controller.CustomServerRestController;
 import com.tosan.client.http.sample.server.api.exception.InvalidParameterException;
 import com.tosan.client.http.sample.server.api.exception.RequiredParameterException;
 import com.tosan.client.http.sample.server.api.model.GetInfoRequestDto;
 import com.tosan.client.http.sample.server.api.model.GetInfoResponseDto;
-import com.tosan.client.http.starter.impl.feign.ExternalServiceInvoker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,16 +20,16 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CircuitBreakerFeignClientService {
 
-    private final ExternalServiceInvoker<CustomServerRestController> externalInvoker;
+    private final ExternalService<CustomServerRestController, HttpClientProperties> externalService;
 
-    @CircuitBreaker(provider = "custom-web-service2")
+    @CircuitBreaker()
     public GetInfoResponseDto callGetInfo(GetInfoRequestDto request, Map<String, String> headers)
             throws InvalidParameterException, RequiredParameterException {
-        return externalInvoker.getClient().getInfo(request, headers);
+        return externalService.getClient().getInfo(request, headers);
     }
 
-    @CircuitBreaker(provider = "custom-web-service2")
+    @CircuitBreaker()
     public GetInfoResponseDto callErrorEndpoint() {
-        return externalInvoker.getClient().error();
+        return externalService.getClient().error();
     }
 }

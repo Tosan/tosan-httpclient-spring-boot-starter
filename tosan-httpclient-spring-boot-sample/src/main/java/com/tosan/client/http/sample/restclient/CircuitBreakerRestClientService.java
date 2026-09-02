@@ -1,7 +1,6 @@
 package com.tosan.client.http.sample.restclient;
 
 import com.tosan.client.http.core.circuitbreaker.CircuitBreaker;
-import com.tosan.client.http.core.circuitbreaker.ExternalServiceProvider;
 import com.tosan.client.http.restclient.starter.impl.ExternalServiceInvoker;
 import com.tosan.client.http.sample.server.api.model.GetInfoRequestDto;
 import com.tosan.client.http.sample.server.api.model.GetInfoResponseDto;
@@ -15,12 +14,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@ExternalServiceProvider("custom-web-service1")
 public class CircuitBreakerRestClientService {
 
     private final ExternalServiceInvoker externalInvoker;
 
-    @CircuitBreaker
+    @CircuitBreaker()
     public ResponseEntity<GetInfoResponseDto> callGetInfo(GetInfoRequestDto request) {
         log.info("Calling /custom-server/info with ssn=[{}]", request.getSsn());
         return externalInvoker
@@ -33,7 +31,7 @@ public class CircuitBreakerRestClientService {
                 .toEntity(GetInfoResponseDto.class);
     }
 
-    @CircuitBreaker
+    @CircuitBreaker()
     public ResponseEntity<GetInfoResponseDto> callErrorEndpoint() {
         log.info("Calling /custom-server/error (always returns 500)");
         return externalInvoker

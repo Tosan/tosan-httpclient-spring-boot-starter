@@ -25,7 +25,7 @@ public class ExternalServiceCircuitBreakerAutoConfiguration {
     public ExternalServiceCircuitBreakerRegistry externalServiceCircuitBreakerRegistry(
             CircuitBreakerExceptionClassifier exceptionClassifier,
             Environment environment) {
-        return new ExternalServiceCircuitBreakerRegistry(exceptionClassifier, environment);
+        return new ExternalServiceCircuitBreakerRegistry(exceptionClassifier);
     }
 
     @Bean

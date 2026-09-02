@@ -6,10 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.tosan.client.http.core.HttpClientProperties;
 import com.tosan.client.http.core.factory.ConfigurableApacheHttpClientFactory;
+import com.tosan.client.http.core.service.ExternalService;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
-import com.tosan.client.http.starter.impl.feign.FeignBuilder;
 import com.tosan.client.http.starter.impl.feign.ExternalServiceInvoker;
+import com.tosan.client.http.starter.impl.feign.FeignBuilder;
 import com.tosan.client.http.starter.impl.feign.exception.FeignConfigurationException;
 import com.tosan.client.http.starter.impl.feign.logger.HttpFeignClientLogger;
 import com.tosan.tools.mask.starter.replace.JsonReplaceHelperDecider;
@@ -37,7 +38,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.tosan.client.http.core.Constants.*;
@@ -246,30 +248,36 @@ public abstract class AbstractFeignConfiguration<P extends HttpClientProperties>
         return UriComponentsBuilder.fromUriString(baseUrl).path(controllerPath).build().toUriString();
     }
 
-    protected final <T> ExternalServiceInvoker<T> createServiceInvoker(Environment environment, String controllerPath, Class<T> clientType) {
+    protected final <T> ExternalService<T, P> createServiceInvoker(Environment environment, String controllerPath, Class<T> clientType) {
         P properties = loadHttpClientProperties(environment);
         validateProperties(properties);
         FeignBuilder feignBuilder = createFeignBuilder(properties);
-        return new ExternalServiceInvoker<T>(
-                feignBuilder.getFeignBuilder().target(clientType, buildTargetUrl(properties, controllerPath)),
+        T client = feignBuilder.getFeignBuilder().target(clientType, buildTargetUrl(properties, controllerPath));
+        return new ExternalServiceInvoker<>(
+                getExternalServiceName(),
+                client,
+                properties,
                 feignBuilder.getHttpClient()
         );
     }
 
-    protected final <T> ExternalServiceInvoker<T> createServiceInvoker(Environment environment, Class<T> clientType) {
+    protected final <T> ExternalService<T, P> createServiceInvoker(Environment environment, Class<T> clientType) {
         return createServiceInvoker(environment, null, clientType);
     }
 
-    protected final <T> ExternalServiceInvoker<T> createServiceInvoker(P properties, String controllerPath, Class<T> clientType) {
+    protected final <T> ExternalService<T, P> createServiceInvoker(P properties, String controllerPath, Class<T> clientType) {
         validateProperties(properties);
         FeignBuilder feignBuilder = createFeignBuilder(properties);
-        return new ExternalServiceInvoker<T>(
-                feignBuilder.getFeignBuilder().target(clientType, buildTargetUrl(properties, controllerPath)),
+        T client = feignBuilder.getFeignBuilder().target(clientType, buildTargetUrl(properties, controllerPath));
+        return new ExternalServiceInvoker<>(
+                getExternalServiceName(),
+                client,
+                properties,
                 feignBuilder.getHttpClient()
         );
     }
 
-    protected final <T> ExternalServiceInvoker<T> createServiceInvoker(P properties, Class<T> clientType) {
+    protected final <T> ExternalService<T, P> createServiceInvoker(P properties, Class<T> clientType) {
         return createServiceInvoker(properties, null, clientType);
     }
 }
