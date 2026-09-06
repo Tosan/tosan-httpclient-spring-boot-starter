@@ -1,8 +1,8 @@
 package com.tosan.client.http.sample.restclient.config;
 
 import com.tosan.client.http.core.HttpClientProperties;
+import com.tosan.client.http.core.service.ExternalService;
 import com.tosan.client.http.restclient.starter.configuration.AbstractRestClientConfiguration;
-import com.tosan.client.http.restclient.starter.impl.ExternalServiceInvoker;
 import com.tosan.client.http.sample.restclient.exception.ExceptionHandler;
 import com.tosan.tools.mask.starter.replace.JsonReplaceHelperDecider;
 import io.micrometer.observation.ObservationRegistry;
@@ -28,8 +28,9 @@ public class ExternalServiceConfiguration extends AbstractRestClientConfiguratio
     }
 
     @Bean(SERVICE_NAME)
-    public ExternalServiceInvoker serviceInvokerBean(Environment environment) {
-        return super.createServiceInvoker(environment);
+    public ExternalService<RestClient, HttpClientProperties> serviceInvokerBean(
+            Environment environment) {
+        return createServiceInvoker(environment);
     }
 
     @Override

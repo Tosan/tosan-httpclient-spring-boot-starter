@@ -1,15 +1,17 @@
 package com.tosan.client.http.sample.feignclient;
 
+import com.tosan.client.http.core.HttpClientProperties;
+import com.tosan.client.http.core.service.ExternalService;
 import com.tosan.client.http.sample.server.api.controller.CustomServerRestController;
 import com.tosan.client.http.sample.server.api.exception.InvalidParameterException;
 import com.tosan.client.http.sample.server.api.exception.RequiredParameterException;
 import com.tosan.client.http.sample.server.api.model.Context;
 import com.tosan.client.http.sample.server.api.model.GetInfoRequestDto;
 import com.tosan.client.http.sample.server.api.model.GetInfoResponseDto;
-import com.tosan.client.http.starter.impl.feign.ExternalServiceInvoker;
 import com.tosan.client.http.starter.impl.feign.exception.FeignClientRequestExecuteException;
 import com.tosan.client.http.starter.impl.feign.exception.InternalServerException;
 import com.tosan.client.http.starter.impl.feign.exception.UnknownException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -29,7 +31,11 @@ import java.util.Map;
 public class RestClientSpringBootApplication implements CommandLineRunner {
 
     @Autowired
-    private ExternalServiceInvoker<CustomServerRestController> externalInvoker;
+    private ExternalService<
+            CustomServerRestController, HttpClientProperties> externalService;
+
+    @Autowired
+    private CircuitBreakerFeignClientService circuitBreakerFeignClientService;
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(RestClientSpringBootApplication.class)
@@ -41,19 +47,23 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
     /**
      * First works fine
      * Second works fine
-     * Second must throw InvalidParameterException
+     * Third must throw InvalidParameterException
      * Forth must throw RequiredParameterException
      * Fifth must throw NumberFormatException
+     *
+     * Circuit breaker scenarios (callErrorEndpoint):
+     * - The first 3 calls fail with a 500, which opens the circuit breaker.
+     * - Any further call is rejected with CallNotPermittedException without reaching the server.
      */
     @Override
     public void run(String... args) {
-        Map<String,String> httpHeaders = new HashMap<>();
-        httpHeaders.put("Test","test");
+        Map<String, String> httpHeaders = new HashMap<>();
+        httpHeaders.put("Test", "test");
         GetInfoRequestDto request = new GetInfoRequestDto();
         request.setSsn("123456789");
         GetInfoResponseDto response;
         try {
-            response = externalInvoker.getClient().getInfo(request, httpHeaders);
+            response = externalService.getClient().getInfo(request, httpHeaders);
             log.info("FeignClient Info: {}", response.toString());
         } catch (InvalidParameterException e) {
             log.error("FeignClient Info exception:{}", e.toString());
@@ -72,7 +82,7 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
             context.setUsername("ali");
             context.setPassword("ali110");
 
-            response = externalInvoker.getClient().login(context);
+            response = externalService.getClient().login(context);
             log.info("FeignClient Info: {}", response.toString());
         } catch (UnknownException e) {
             log.error("FeignClient Unknown exception with status Code 4xx:{}", e.toString());
@@ -84,7 +94,7 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
 
         request.setSsn(null);
         try {
-            response = externalInvoker.getClient().getInfo(request, httpHeaders);
+            response = externalService.getClient().getInfo(request, httpHeaders);
             log.info("FeignClient Info: {}", response.toString());
         } catch (InvalidParameterException e) {
             log.error("FeignClient Info exception:{}", e.toString());
@@ -100,7 +110,7 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
 
         request.setSsn("");
         try {
-            response = externalInvoker.getClient().getInfo(request, httpHeaders);
+            response = externalService.getClient().getInfo(request, httpHeaders);
             log.info("FeignClient Info: {}", response.toString());
         } catch (InvalidParameterException e) {
             log.error("FeignClient Info exception:{}", e.toString());
@@ -116,7 +126,7 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
 
         request.setSsn("a1233");
         try {
-            response = externalInvoker.getClient().getInfo(request, httpHeaders);
+            response = externalService.getClient().getInfo(request, httpHeaders);
             log.info("FeignClient Info: {}", response.toString());
         } catch (InvalidParameterException e) {
             log.error("FeignClient Info exception:{}", e.toString());
@@ -128,6 +138,35 @@ public class RestClientSpringBootApplication implements CommandLineRunner {
             log.error("FeignClientRequestExecute Exception:", e);
         } catch (InternalServerException e) {
             log.error("InternalServerError Exception:{}", e.toString());
+        }
+
+        GetInfoRequestDto validRequest = new GetInfoRequestDto();
+        validRequest.setSsn("123456789");
+        try {
+            response = circuitBreakerFeignClientService.callGetInfo(validRequest, httpHeaders);
+            log.info("[CB] Successful call -> Response: {}", response);
+        } catch (Exception e) {
+            log.error("[CB] Unexpected exception on successful call:", e);
+        }
+
+        for (int i = 1; i <= 5; i++) {
+            try {
+                circuitBreakerFeignClientService.callErrorEndpoint();
+            } catch (CallNotPermittedException e) {
+                log.warn("[CB] Call {} rejected because circuit breaker is OPEN (CallNotPermittedException)", i);
+            } catch (Exception e) {
+                log.warn("[CB] Call {} recorded as failure: {}", i, e.getClass().getSimpleName());
+            }
+        }
+
+        // Once OPEN, even a valid request is rejected without reaching the server.
+        try {
+            response = circuitBreakerFeignClientService.callGetInfo(validRequest, httpHeaders);
+            log.info("[CB] Response: {}", response);
+        } catch (CallNotPermittedException e) {
+            log.warn("[CB] Valid call rejected while circuit breaker is OPEN -> {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("[CB] Unexpected exception:", e);
         }
     }
 }

@@ -2,6 +2,7 @@ package com.tosan.client.http.restclient.starter.configuration;
 
 import com.tosan.client.http.core.HttpClientProperties;
 import com.tosan.client.http.core.factory.ConfigurableApacheHttpClientFactory;
+import com.tosan.client.http.core.service.ExternalService;
 import com.tosan.client.http.restclient.starter.exception.RestClientConfigurationException;
 import com.tosan.client.http.restclient.starter.impl.ClientService;
 import com.tosan.client.http.restclient.starter.impl.ExternalServiceInvoker;
@@ -157,14 +158,22 @@ public abstract class AbstractRestClientConfiguration<P extends HttpClientProper
         );
     }
 
-    protected ExternalServiceInvoker createServiceInvoker(Environment environment) {
+    protected ExternalService<RestClient, P> createServiceInvoker(Environment environment) {
         P properties = loadHttpClientProperties(environment);
         validateProperties(properties);
-        return new ExternalServiceInvoker(createClientService(properties), properties);
+        return new ExternalServiceInvoker<>(
+                getExternalServiceName(),
+                createClientService(properties),
+                properties
+        );
     }
 
-    protected ExternalServiceInvoker createServiceInvoker(P properties) {
+    protected ExternalService<RestClient, P> createServiceInvoker(P properties) {
         validateProperties(properties);
-        return new ExternalServiceInvoker(createClientService(properties), properties);
+        return new ExternalServiceInvoker<>(
+                getExternalServiceName(),
+                createClientService(properties),
+                properties
+        );
     }
 }

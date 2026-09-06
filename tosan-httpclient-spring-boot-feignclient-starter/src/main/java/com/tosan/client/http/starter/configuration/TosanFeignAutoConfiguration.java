@@ -1,6 +1,7 @@
 package com.tosan.client.http.starter.configuration;
 
 import com.tosan.client.http.core.Constants;
+import com.tosan.client.http.core.circuitbreaker.ExternalServiceCircuitBreakerRegistry;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
 import com.tosan.client.http.starter.impl.feign.ExceptionExtractType;
@@ -15,6 +16,7 @@ import com.tosan.tools.mask.starter.replace.JsonReplaceHelperDecider;
 import com.tosan.tools.mask.starter.replace.RegexReplaceHelper;
 import feign.Feign;
 import feign.codec.ErrorDecoder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -69,5 +71,12 @@ public class TosanFeignAutoConfiguration {
         securedParameters.add(Constants.AUTHORIZATION_SECURE_PARAM);
         securedParameters.add(Constants.PROXY_AUTHORIZATION_SECURE_PARAM);
         return new SecureParametersConfig(securedParameters);
+    }
+
+    @Bean
+    @ConditionalOnBean(ExternalServiceCircuitBreakerRegistry.class)
+    public FeignCircuitBreakerRegistrar feignCircuitBreakerRegistrar(
+            ExternalServiceCircuitBreakerRegistry circuitBreakerRegistry) {
+        return new FeignCircuitBreakerRegistrar(circuitBreakerRegistry);
     }
 }
