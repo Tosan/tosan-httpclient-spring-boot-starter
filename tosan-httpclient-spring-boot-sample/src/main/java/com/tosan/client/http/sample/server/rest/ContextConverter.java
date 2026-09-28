@@ -1,6 +1,6 @@
 package com.tosan.client.http.sample.server.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.tosan.client.http.sample.server.api.model.Context;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;

@@ -1,11 +1,12 @@
 package com.tosan.client.http.starter.impl.feign.logger;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.util.RawValue;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.util.RawValue;
 import com.tosan.tools.mask.starter.dto.JsonReplaceResultDto;
 import com.tosan.tools.mask.starter.replace.JsonReplaceHelperDecider;
 import feign.Request;
@@ -29,15 +30,14 @@ import static feign.Util.UTF_8;
  * @since 8/7/2023
  */
 public class HttpFeignClientLogger extends feign.Logger {
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = JsonMapper.builder()
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .changeDefaultPropertyInclusion(incl ->
+                    JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.ALWAYS))
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
     private static final Logger logger = LoggerFactory.getLogger(HttpFeignClientLogger.class);
-
-    static {
-        mapper.enable(SerializationFeature.INDENT_OUTPUT)
-                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-                .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
 
     private final String webServiceName;
     private final JsonReplaceHelperDecider replaceHelperDecider;
@@ -200,7 +200,7 @@ public class HttpFeignClientLogger extends feign.Logger {
     private String toJson(Object object) {
         try {
             return mapper.writeValueAsString(object);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             return "error creating json. " + exception.getMessage();
         }
     }

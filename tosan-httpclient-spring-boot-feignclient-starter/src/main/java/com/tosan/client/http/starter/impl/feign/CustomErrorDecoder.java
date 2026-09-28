@@ -1,9 +1,10 @@
 package com.tosan.client.http.starter.impl.feign;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 import com.tosan.client.http.starter.impl.feign.exception.*;
 import feign.Response;
 import feign.codec.ErrorDecoder;
@@ -154,11 +155,12 @@ public class CustomErrorDecoder implements ErrorDecoder, InitializingBean {
     }
 
     private ObjectMapper getDefaultObjectMapper() {
-        ObjectMapper defaultObjectMapper = new ObjectMapper();
-        defaultObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        defaultObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        defaultObjectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        return defaultObjectMapper;
+        return JsonMapper.builder()
+                .changeDefaultPropertyInclusion(incl ->
+                        JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.ALWAYS))
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                .build();
     }
 
     private void extractAndFillMap(Class<? extends Exception> type) {

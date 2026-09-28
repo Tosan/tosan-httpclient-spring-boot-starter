@@ -1,8 +1,8 @@
 package com.tosan.client.http.starter.impl.feign;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tosan.client.http.starter.impl.feign.exception.TosanWebServiceException;
 import com.tosan.client.http.starter.impl.feign.exception.TosanWebServiceRuntimeException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.*;
 
