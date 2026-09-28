@@ -1,15 +1,12 @@
 package com.tosan.client.http.starter.configuration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.tosan.client.http.core.HttpClientProperties;
 import com.tosan.client.http.core.factory.ConfigurableApacheHttpClientFactory;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoder;
 import com.tosan.client.http.starter.impl.feign.CustomErrorDecoderConfig;
-import com.tosan.client.http.starter.impl.feign.FeignBuilder;
 import com.tosan.client.http.starter.impl.feign.ExternalServiceInvoker;
+import com.tosan.client.http.starter.impl.feign.FeignBuilder;
 import com.tosan.client.http.starter.impl.feign.exception.FeignConfigurationException;
 import com.tosan.client.http.starter.impl.feign.logger.HttpFeignClientLogger;
 import com.tosan.tools.mask.starter.replace.JsonReplaceHelperDecider;
@@ -34,10 +31,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.tosan.client.http.core.Constants.*;
@@ -232,10 +234,12 @@ public abstract class AbstractFeignConfiguration<P extends HttpClientProperties>
     }
 
     private ObjectMapper createDefaultObjectMapper() {
-        return new ObjectMapper()
-                .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        return JsonMapper.builder()
+                .changeDefaultPropertyInclusion(incl ->
+                        JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.ALWAYS))
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                .build();
     }
 
     private String buildTargetUrl(P properties, String controllerPath) {

@@ -1,12 +1,12 @@
 package com.tosan.client.http.restclient.starter.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.util.RawValue;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.util.RawValue;
 import com.tosan.tools.mask.starter.dto.JsonReplaceResultDto;
 import com.tosan.tools.mask.starter.replace.JsonReplaceHelperDecider;
 import org.apache.commons.lang3.StringUtils;
@@ -25,14 +25,13 @@ import java.util.*;
  * @since 8/3/2022
  */
 public class HttpLoggingInterceptorUtil {
-    private static final ObjectMapper mapper = new JsonMapper();
-
-    static {
-        mapper.enable(SerializationFeature.INDENT_OUTPUT)
-                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-                .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
+    private static final ObjectMapper mapper = JsonMapper.builder()
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .changeDefaultPropertyInclusion(incl ->
+                    JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.ALWAYS))
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
 
     private final JsonReplaceHelperDecider replaceHelperDecider;
 
@@ -138,7 +137,7 @@ public class HttpLoggingInterceptorUtil {
     private String toJson(Object object) {
         try {
             return mapper.writeValueAsString(object);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             return "error creating json. " + exception.getMessage();
         }
     }
